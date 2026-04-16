@@ -1,5 +1,14 @@
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "./generated/prisma/client";
 import { decrypt, encrypt } from "./encryption";
+
+function resolveDatabaseUrl(): string {
+  const raw = process.env.DATABASE_URL;
+  if (!raw) {
+    throw new Error("DATABASE_URL is not set. Add it to .env or .env.local.");
+  }
+  return raw.startsWith("file:") ? raw.slice("file:".length) : raw;
+}
 
 type UserLike = { minimaxApiKey?: string | null } | null | undefined;
 
@@ -29,7 +38,8 @@ function encryptWriteArgs(args: { data?: Record<string, unknown> } | undefined) 
 }
 
 function createPrismaClient() {
-  return new PrismaClient().$extends({
+  const adapter = new PrismaBetterSqlite3({ url: resolveDatabaseUrl() });
+  return new PrismaClient({ adapter }).$extends({
     query: {
       user: {
         async create({ args, query }) {

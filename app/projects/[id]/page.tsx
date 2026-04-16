@@ -1,0 +1,78 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { getProject } from "@/app/actions/projects";
+import { ProjectHeader } from "@/components/projects/project-header";
+
+export default async function ProjectPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const result = await getProject(id);
+  if (result.error || !result.data) {
+    redirect("/");
+  }
+
+  const project = result.data;
+
+  return (
+    <main className="flex min-h-screen flex-col">
+      <header className="flex items-center gap-4 border-b border-zinc-800 px-6 py-4">
+        <Link
+          href="/"
+          aria-label="Back to projects"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M10 3L5 8l5 5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+        <ProjectHeader project={project} />
+      </header>
+
+      <section className="flex flex-1 flex-col gap-8 px-6 py-6">
+        <div className="flex flex-col gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            Spec
+          </h2>
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+            {project.spec ? (
+              <p className="whitespace-pre-wrap text-sm text-zinc-200">
+                {project.spec}
+              </p>
+            ) : (
+              <p className="text-sm text-zinc-500">
+                No spec yet — edit the project to add one
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            Tooling
+          </h2>
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-500">
+            Tooling coming soon.
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            Tasks
+          </h2>
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-500">
+            Tasks coming soon.
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}

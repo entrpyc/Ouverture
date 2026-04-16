@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { finalizeTask } from "@/app/actions/tasks";
+import { parseMessageContent } from "@/lib/parse-tooling-suggestions";
 import type { ProjectTool, Task } from "@/lib/types";
 
 type ChatMessage = {
@@ -17,6 +18,17 @@ type Props = {
   projectId: string;
   projectTools: ProjectTool[];
 };
+
+function ToolingSuggestionCard({ suggestion }: { suggestion: string }) {
+  return (
+    <div className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+        Tooling suggestion
+      </p>
+      <p className="mt-1 text-sm text-zinc-200">{suggestion}</p>
+    </div>
+  );
+}
 
 function AssistantMarkdown({ content }: { content: string }) {
   return (
@@ -91,6 +103,39 @@ function AssistantMarkdown({ content }: { content: string }) {
       >
         {content}
       </ReactMarkdown>
+    </div>
+  );
+}
+
+function AssistantMessage({
+  content,
+  isStreaming,
+}: {
+  content: string;
+  isStreaming: boolean;
+}) {
+  if (isStreaming) {
+    return (
+      <div className="max-w-[90%] rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100">
+        {content ? <AssistantMarkdown content={content} /> : "…"}
+      </div>
+    );
+  }
+
+  if (!content) return null;
+
+  const { text, suggestions } = parseMessageContent(content);
+
+  return (
+    <div className="flex max-w-[90%] flex-col gap-2">
+      {text && (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100">
+          <AssistantMarkdown content={text} />
+        </div>
+      )}
+      {suggestions.map((suggestion, i) => (
+        <ToolingSuggestionCard key={i} suggestion={suggestion} />
+      ))}
     </div>
   );
 }
@@ -286,13 +331,10 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
                     {m.content}
                   </div>
                 ) : (
-                  <div className="max-w-[90%] rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100">
-                    {m.content ? (
-                      <AssistantMarkdown content={m.content} />
-                    ) : isStreaming && i === messages.length - 1 ? (
-                      "…"
-                    ) : null}
-                  </div>
+                  <AssistantMessage
+                    content={m.content}
+                    isStreaming={isStreaming && i === messages.length - 1}
+                  />
                 )}
               </li>
             ))}

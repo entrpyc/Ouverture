@@ -1,12 +1,7 @@
 import { auth } from "@/auth";
-import { getAdapterForUser } from "@/lib/ai";
-
 
 export default async function Home() {
   const session = await auth();
-
-  const adapter = await getAdapterForUser();
-console.log("adapter:", adapter.constructor.name); // "MiniMaxAdapter"
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-6">

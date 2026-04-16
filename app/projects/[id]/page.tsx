@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getProject } from "@/app/actions/projects";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ToolingSection } from "@/components/projects/tooling-section";
+import { TaskList } from "@/components/tasks/task-list";
 
 export default async function ProjectPage({
   params,
@@ -69,8 +70,8 @@ export default async function ProjectPage({
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
             Tasks
           </h2>
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-500">
-            Tasks coming soon.
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+            <TaskList projectId={project.id} />
           </div>
         </div>
       </section>

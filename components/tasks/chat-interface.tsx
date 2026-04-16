@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { finalizeTask } from "@/app/actions/tasks";
 import type { ProjectTool, Task } from "@/lib/types";
 
@@ -15,6 +17,83 @@ type Props = {
   projectId: string;
   projectTools: ProjectTool[];
 };
+
+function AssistantMarkdown({ content }: { content: string }) {
+  return (
+    <div className="prose-assistant flex flex-col gap-3 leading-relaxed">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          p: ({ children }) => <p className="text-zinc-200">{children}</p>,
+          strong: ({ children }) => (
+            <strong className="font-semibold text-zinc-50">{children}</strong>
+          ),
+          em: ({ children }) => <em className="italic">{children}</em>,
+          ul: ({ children }) => (
+            <ul className="list-disc pl-5 text-zinc-200">{children}</ul>
+          ),
+          ol: ({ children }) => (
+            <ol className="list-decimal pl-5 text-zinc-200">{children}</ol>
+          ),
+          li: ({ children }) => <li className="marker:text-zinc-500">{children}</li>,
+          h1: ({ children }) => (
+            <h1 className="text-base font-semibold text-zinc-50">{children}</h1>
+          ),
+          h2: ({ children }) => (
+            <h2 className="text-sm font-semibold text-zinc-50">{children}</h2>
+          ),
+          h3: ({ children }) => (
+            <h3 className="text-sm font-semibold text-zinc-50">{children}</h3>
+          ),
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-2 border-zinc-700 pl-3 text-zinc-300">
+              {children}
+            </blockquote>
+          ),
+          code: ({ className, children, ...props }) => {
+            const isBlock = /language-/.test(className ?? "");
+            if (isBlock) {
+              return (
+                <code
+                  className="block overflow-x-auto rounded-md bg-zinc-900 p-3 font-mono text-xs text-zinc-100"
+                  {...props}
+                >
+                  {children}
+                </code>
+              );
+            }
+            return (
+              <code
+                className="rounded bg-zinc-800 px-1 py-0.5 font-mono text-xs text-zinc-100"
+                {...props}
+              >
+                {children}
+              </code>
+            );
+          },
+          pre: ({ children }) => (
+            <pre className="overflow-x-auto rounded-md bg-zinc-900 p-3 text-xs text-zinc-100">
+              {children}
+            </pre>
+          ),
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-100 underline underline-offset-2 hover:text-white"
+            >
+              {children}
+            </a>
+          ),
+          hr: () => <hr className="border-zinc-800" />,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 export function ChatInterface({ task, projectId, projectTools }: Props) {
   void projectTools;
@@ -69,21 +148,54 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let buffer = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        if (!chunk) continue;
+      const appendDelta = (delta: string) => {
+        if (!delta) return;
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
           if (last && last.role === "assistant") {
-            next[next.length - 1] = { ...last, content: last.content + chunk };
+            next[next.length - 1] = { ...last, content: last.content + delta };
           }
           return next;
         });
+      };
+
+      const handleFrame = (frame: string) => {
+        const trimmed = frame.trim();
+        if (!trimmed) return;
+        const dataLines = trimmed
+          .split("\n")
+          .filter((l) => l.startsWith("data:"))
+          .map((l) => l.slice(5).trim());
+        if (dataLines.length === 0) return;
+        const payload = dataLines.join("\n");
+        if (payload === "[DONE]") return;
+        try {
+          const parsed = JSON.parse(payload) as {
+            choices?: { delta?: { content?: string } }[];
+          };
+          const delta = parsed.choices?.[0]?.delta?.content ?? "";
+          appendDelta(delta);
+        } catch {
+          // ignore malformed frames
+        }
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let sepIndex = buffer.indexOf("\n\n");
+        while (sepIndex !== -1) {
+          const frame = buffer.slice(0, sepIndex);
+          buffer = buffer.slice(sepIndex + 2);
+          handleFrame(frame);
+          sepIndex = buffer.indexOf("\n\n");
+        }
       }
+      if (buffer.length > 0) handleFrame(buffer);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Chat request failed";
       setError(message);
@@ -174,8 +286,12 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
                     {m.content}
                   </div>
                 ) : (
-                  <div className="max-w-[90%] whitespace-pre-wrap text-sm text-zinc-200">
-                    {m.content || (isStreaming && i === messages.length - 1 ? "…" : "")}
+                  <div className="max-w-[90%] rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100">
+                    {m.content ? (
+                      <AssistantMarkdown content={m.content} />
+                    ) : isStreaming && i === messages.length - 1 ? (
+                      "…"
+                    ) : null}
                   </div>
                 )}
               </li>

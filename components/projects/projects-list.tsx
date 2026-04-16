@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Project } from "@/lib/types";
 import { ProjectCard } from "./project-card";
 import { NewProjectButton } from "./new-project-button";
+import { ProjectModal } from "./project-modal";
 
 type Props = {
   projects: Project[];
@@ -14,9 +15,7 @@ export function ProjectsList({ projects }: Props) {
   const [editing, setEditing] = useState<Project | null>(null);
   const [deleting, setDeleting] = useState<Project | null>(null);
 
-  // Modal wiring lands in Ticket 2; keep these handles alive so callers compile.
-  void createOpen;
-  void editing;
+  // Delete modal lands in a later ticket; holding the state keeps the handle live.
   void deleting;
 
   return (
@@ -45,6 +44,16 @@ export function ProjectsList({ projects }: Props) {
           ))}
         </div>
       )}
+
+      <ProjectModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+      />
+      <ProjectModal
+        open={editing !== null}
+        project={editing}
+        onClose={() => setEditing(null)}
+      />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { finalizeTask } from "@/app/actions/tasks";
 import type { ProjectTool, Task } from "@/lib/types";
 
 type ChatMessage = {
@@ -17,6 +19,7 @@ type Props = {
 export function ChatInterface({ task, projectId, projectTools }: Props) {
   void projectTools;
 
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>(
     (task.conversationHistory as ChatMessage[] | null) ?? []
   );
@@ -101,9 +104,43 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
     if (!canFinalize) return;
     setError(null);
     setIsFinalizing(true);
-    // Full implementation lands in Ticket 3.
-    console.log("finalize", { taskId: task.id, messages });
-    setIsFinalizing(false);
+
+    try {
+      const response = await fetch("/api/ai/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages, projectId }),
+      });
+
+      if (!response.ok) {
+        let detail = "Finalize request failed";
+        try {
+          const data = await response.json();
+          if (typeof data?.error === "string") detail = data.error;
+        } catch {
+          // leave default
+        }
+        throw new Error(detail);
+      }
+
+      const { title, requirements } = (await response.json()) as {
+        title: string;
+        requirements: string;
+      };
+
+      const result = await finalizeTask(task.id, {
+        title,
+        requirements,
+        conversationHistory: messages,
+      });
+      if (result.error) throw new Error(result.error);
+
+      router.refresh();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to finalize";
+      setError(message);
+      setIsFinalizing(false);
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -149,15 +186,17 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
       </div>
 
       {(isStreaming || isFinalizing) && (
-        <p className="text-xs text-zinc-500">Thinking…</p>
-      )}
-      {error && (
-        <p className="text-sm text-red-400" role="alert">
-          {error}
+        <p className="text-xs text-zinc-500">
+          {isFinalizing ? "Generating task requirements…" : "Thinking…"}
         </p>
       )}
 
-      <div className="flex items-center justify-end">
+      <div className="flex flex-col items-end gap-2">
+        {error && (
+          <p className="text-sm text-red-400" role="alert">
+            {error}
+          </p>
+        )}
         <button
           type="button"
           onClick={handleFinalize}

@@ -85,7 +85,7 @@ export async function createTask(
 
 export async function finalizeTask(
   taskId: string,
-  data: { requirements: string; conversationHistory: object[] }
+  data: { title: string; requirements: string; conversationHistory: object[] }
 ): Promise<ActionResponse<Task>> {
   try {
     const userId = await getAuthenticatedUserId();
@@ -95,10 +95,16 @@ export async function finalizeTask(
     });
     if (!existing) return failure("Task not found");
 
+    const title = data.title.trim();
+    if (!title) return failure("Title is required");
+    const requirements = data.requirements.trim();
+    if (!requirements) return failure("Requirements are required");
+
     const task = await prisma.task.update({
       where: { id: taskId },
       data: {
-        requirements: data.requirements,
+        title,
+        requirements,
         conversationHistory: data.conversationHistory,
       },
     });

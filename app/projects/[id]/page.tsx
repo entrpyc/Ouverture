@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getProject } from "@/app/actions/projects";
 import { ProjectHeader } from "@/components/projects/project-header";
+import { ToolingSection } from "@/components/projects/tooling-section";
 
 export default async function ProjectPage({
   params,
@@ -59,8 +60,8 @@ export default async function ProjectPage({
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
             Tooling
           </h2>
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-500">
-            Tooling coming soon.
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+            <ToolingSection projectId={project.id} tools={project.tools} />
           </div>
         </div>
 

@@ -15,14 +15,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = typeof credentials?.email === "string" ? credentials.email : null;
+        console.log("[auth] authorize start", { emailType: typeof credentials?.email });
+        const rawEmail = typeof credentials?.email === "string" ? credentials.email : null;
         const password = typeof credentials?.password === "string" ? credentials.password : null;
-        if (!email || !password) return null;
+        if (!rawEmail || !password) {
+          console.log("[auth] missing creds");
+          return null;
+        }
+        const email = rawEmail.trim().toLowerCase();
 
         const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) return null;
+        if (!user) {
+          console.log("[auth] no user for", email);
+          return null;
+        }
 
         const valid = await compare(password, user.passwordHash);
+        console.log("[auth] bcrypt compare", { valid });
         if (!valid) return null;
 
         return { id: user.id, email: user.email };

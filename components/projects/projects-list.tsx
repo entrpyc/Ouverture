@@ -5,6 +5,7 @@ import type { Project } from "@/lib/types";
 import { ProjectCard } from "./project-card";
 import { NewProjectButton } from "./new-project-button";
 import { ProjectModal } from "./project-modal";
+import { DeleteProjectDialog } from "./delete-project-dialog";
 
 type Props = {
   projects: Project[];
@@ -14,9 +15,6 @@ export function ProjectsList({ projects }: Props) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
   const [deleting, setDeleting] = useState<Project | null>(null);
-
-  // Delete modal lands in a later ticket; holding the state keeps the handle live.
-  void deleting;
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -53,6 +51,10 @@ export function ProjectsList({ projects }: Props) {
         open={editing !== null}
         project={editing}
         onClose={() => setEditing(null)}
+      />
+      <DeleteProjectDialog
+        project={deleting}
+        onClose={() => setDeleting(null)}
       />
     </div>
   );

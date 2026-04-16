@@ -1,19 +1,33 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTask } from "@/app/actions/tasks";
+import { getProject } from "@/app/actions/projects";
+import { ChatInterface } from "@/components/tasks/chat-interface";
+import { TaskDetail } from "@/components/tasks/task-detail";
 
-export default async function TaskStubPage({
+export default async function TaskPage({
   params,
 }: {
   params: Promise<{ id: string; taskId: string }>;
 }) {
   const { id, taskId } = await params;
-  const result = await getTask(taskId);
-  if (result.error || !result.data) {
+
+  const [taskResult, projectResult] = await Promise.all([
+    getTask(taskId),
+    getProject(id),
+  ]);
+
+  if (taskResult.error || !taskResult.data) {
+    redirect(`/projects/${id}`);
+  }
+  if (projectResult.error || !projectResult.data) {
     redirect(`/projects/${id}`);
   }
 
-  const task = result.data;
+  const task = taskResult.data;
+  const project = projectResult.data;
+  const hasRequirements =
+    typeof task.requirements === "string" && task.requirements.length > 0;
 
   return (
     <main className="flex min-h-screen flex-col">
@@ -37,6 +51,14 @@ export default async function TaskStubPage({
           {task.title}
         </h1>
       </header>
+
+      <section className="flex flex-1 flex-col px-6 py-6">
+        {hasRequirements ? (
+          <TaskDetail task={task} projectId={id} />
+        ) : (
+          <ChatInterface task={task} projectId={id} projectTools={project.tools} />
+        )}
+      </section>
     </main>
   );
 }

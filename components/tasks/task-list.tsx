@@ -17,7 +17,7 @@ export async function TaskList({ projectId }: Props) {
         <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
           All tasks
         </h3>
-        <NewTaskButton />
+        <NewTaskButton projectId={projectId} />
       </div>
 
       {result.error && (

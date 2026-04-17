@@ -9,6 +9,7 @@ import { EditTaskModal } from "./edit-task-modal";
 import { DeleteTaskDialog } from "./delete-task-dialog";
 import { ProposedPhasesReview } from "@/components/phases/proposed-phases-review";
 import { ConfirmedPhaseRow } from "@/components/phases/confirmed-phase-row";
+import { ThinkingEmoji } from "@/components/thinking-emoji";
 
 export type ProposedPhase = {
   title: string;
@@ -52,6 +53,7 @@ export function TaskDetail({ task, projectId }: Props) {
   const [proposedPhases, setProposedPhases] = useState<ProposedPhase[] | null>(
     (task.proposedPhases as ProposedPhase[] | null) ?? null
   );
+  const [phaseCountInput, setPhaseCountInput] = useState("");
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [statusPending, startStatusTransition] = useTransition();
   const [donePhasesOpen, setDonePhasesOpen] = useState(false);
@@ -87,12 +89,25 @@ export function TaskDetail({ task, projectId }: Props) {
   async function handleGeneratePhases() {
     if (isGenerating) return;
     setGenerationError(null);
+    const trimmed = phaseCountInput.trim();
+    let phaseCount: number | undefined;
+    if (trimmed) {
+      const parsed = Number(trimmed);
+      if (!Number.isInteger(parsed) || parsed < 1) {
+        setGenerationError("Phase count must be a positive integer");
+        return;
+      }
+      phaseCount = parsed;
+    }
     setIsGenerating(true);
     try {
       const response = await fetch("/api/ai/phases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId: task.id }),
+        body: JSON.stringify({
+          taskId: task.id,
+          ...(phaseCount !== undefined ? { phaseCount } : {}),
+        }),
       });
       if (!response.ok) {
         let detail = "Phase generation failed";
@@ -301,14 +316,34 @@ export function TaskDetail({ task, projectId }: Props) {
             />
           ) : (
             <div className="flex flex-col items-start gap-2">
-              <button
-                type="button"
-                onClick={handleGeneratePhases}
-                disabled={isGenerating}
-                className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-              >
-                {isGenerating ? "Generating phases…" : "Generate phases"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleGeneratePhases}
+                  disabled={isGenerating}
+                  className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+                >
+                  {isGenerating ? (
+                    <>
+                      Generating phases <ThinkingEmoji intervalMs={2000} />
+                    </>
+                  ) : (
+                    "Generate phases"
+                  )}
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
+                  value={phaseCountInput}
+                  onChange={(e) => setPhaseCountInput(e.target.value)}
+                  disabled={isGenerating}
+                  placeholder="Auto"
+                  aria-label="Number of phases (leave blank for auto)"
+                  className="w-20 rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </div>
               {generationError && (
                 <p className="text-sm text-red-400" role="alert">
                   {generationError}

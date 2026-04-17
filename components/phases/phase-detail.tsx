@@ -10,6 +10,7 @@ import { DeletePhaseDialog } from "./delete-phase-dialog";
 import { PhaseToolingEditor } from "./phase-tooling-editor";
 import { ProposedTicketsReview } from "@/components/tickets/proposed-tickets-review";
 import { ConfirmedTicketRow } from "@/components/tickets/confirmed-ticket-row";
+import { ThinkingEmoji } from "@/components/thinking-emoji";
 
 export type ProposedTicket = {
   title: string;
@@ -376,7 +377,13 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
                 disabled={isGenerating}
                 className="self-start rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
               >
-                {isGenerating ? "Generating tickets…" : "Generate tickets"}
+                {isGenerating ? (
+                  <>
+                    Generating tickets <ThinkingEmoji intervalMs={2000} />
+                  </>
+                ) : (
+                  "Generate tickets"
+                )}
               </button>
               {generationError && (
                 <p className="text-sm text-red-400" role="alert">

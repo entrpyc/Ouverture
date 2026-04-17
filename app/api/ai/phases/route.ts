@@ -31,16 +31,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { taskId?: string };
+  let body: { taskId?: string; phaseCount?: number };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { taskId } = body;
+  const { taskId, phaseCount } = body;
   if (typeof taskId !== "string" || !taskId) {
     return NextResponse.json({ error: "taskId is required" }, { status: 400 });
+  }
+
+  let resolvedPhaseCount: number | undefined;
+  if (phaseCount !== undefined) {
+    if (
+      typeof phaseCount !== "number" ||
+      !Number.isInteger(phaseCount) ||
+      phaseCount < 1
+    ) {
+      return NextResponse.json(
+        { error: "phaseCount must be a positive integer" },
+        { status: 400 }
+      );
+    }
+    resolvedPhaseCount = phaseCount;
   }
 
   const task = await prisma.task.findFirst({
@@ -73,6 +88,9 @@ export async function POST(request: Request) {
       projectSpec: task.project.spec ?? "",
       taskRequirements: task.requirements,
       projectTooling,
+      ...(resolvedPhaseCount !== undefined
+        ? { phaseCount: resolvedPhaseCount }
+        : {}),
     }),
   };
 

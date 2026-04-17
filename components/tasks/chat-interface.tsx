@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { finalizeTask, saveConversation } from "@/app/actions/tasks";
 import { parseMessageContent } from "@/lib/parse-tooling-suggestions";
+import { ThinkingEmoji } from "@/components/thinking-emoji";
 import type { ProjectTool, Task } from "@/lib/types";
 
 type ChatMessage = {
@@ -117,7 +118,7 @@ function AssistantMessage({
   if (isStreaming) {
     return (
       <div className="max-w-[90%] rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100">
-        {content ? <AssistantMarkdown content={content} /> : "…"}
+        {content ? <AssistantMarkdown content={content} /> : <ThinkingEmoji />}
       </div>
     );
   }
@@ -378,7 +379,13 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
           disabled={!canFinalize}
           className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-zinc-600"
         >
-          {isFinalizing ? "Finalizing…" : "Finalize"}
+          {isFinalizing ? (
+            <>
+              Finalizing <ThinkingEmoji intervalMs={2000} />
+            </>
+          ) : (
+            "Finalize"
+          )}
         </button>
       </div>
 

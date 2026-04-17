@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Ticket, TicketTooling } from "@/lib/types";
 import { EditTicketModal } from "./edit-ticket-modal";
 import { DeleteTicketDialog } from "./delete-ticket-dialog";
+import { TicketToolingEditor } from "./ticket-tooling-editor";
 
 type Props = {
   ticket: Ticket & { tooling: TicketTooling[] };
@@ -91,6 +92,7 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [toolingEditOpen, setToolingEditOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -240,16 +242,24 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
             <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
               Tooling
             </h2>
-            <button
-              type="button"
-              disabled
-              title="Wiring in Ticket 6"
-              className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-            >
-              Edit tooling
-            </button>
+            {!toolingEditOpen && (
+              <button
+                type="button"
+                onClick={() => setToolingEditOpen(true)}
+                className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+              >
+                Edit tooling
+              </button>
+            )}
           </div>
-          {ticket.tooling.length === 0 ? (
+          {toolingEditOpen ? (
+            <TicketToolingEditor
+              ticketId={ticket.id}
+              tooling={ticket.tooling}
+              onCancel={() => setToolingEditOpen(false)}
+              onSaved={() => setToolingEditOpen(false)}
+            />
+          ) : ticket.tooling.length === 0 ? (
             <p className="text-sm text-zinc-500">No tooling assigned.</p>
           ) : (
             <ul className="flex flex-col gap-2">

@@ -2,10 +2,25 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import type { Phase, PhaseTooling, Ticket } from "@/lib/types";
+import type { Phase, PhaseTooling, Ticket, ToolType } from "@/lib/types";
 import { EditPhaseModal } from "./edit-phase-modal";
 import { DeletePhaseDialog } from "./delete-phase-dialog";
 import { PhaseToolingEditor } from "./phase-tooling-editor";
+
+export type ProposedTicket = {
+  title: string;
+  description: string;
+  instructions: string[];
+  claudeCodePrompt: string;
+  testPrompt: string;
+  acceptanceCriteria: string[];
+  tooling: {
+    type: ToolType;
+    name: string;
+    isNew: boolean;
+    rationale: string | null;
+  }[];
+};
 
 type Props = {
   phase: Phase & { tooling: PhaseTooling[] };
@@ -50,7 +65,14 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [toolingEditOpen, setToolingEditOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [proposedTickets, setProposedTickets] = useState<
+    ProposedTicket[] | null
+  >(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const hasConfirmedTickets = tickets.length > 0;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -63,8 +85,35 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  function handleGenerateTickets() {
-    console.log("Generate tickets clicked — wiring in Phase 7");
+  async function handleGenerateTickets() {
+    if (isGenerating) return;
+    setGenerationError(null);
+    setIsGenerating(true);
+    try {
+      const response = await fetch("/api/ai/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phaseId: phase.id }),
+      });
+      if (!response.ok) {
+        let detail = "Ticket generation failed";
+        try {
+          const data = await response.json();
+          if (typeof data?.error === "string") detail = data.error;
+        } catch {
+          // leave default
+        }
+        throw new Error(detail);
+      }
+      const ticketsJson = (await response.json()) as ProposedTicket[];
+      setProposedTickets(ticketsJson);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Ticket generation failed";
+      setGenerationError(message);
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   return (
@@ -206,21 +255,10 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
         </section>
 
         <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Tickets
-            </h2>
-            <button
-              type="button"
-              onClick={handleGenerateTickets}
-              className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-            >
-              Generate tickets
-            </button>
-          </div>
-          {tickets.length === 0 ? (
-            <p className="text-sm text-zinc-500">No tickets yet.</p>
-          ) : (
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            Tickets
+          </h2>
+          {hasConfirmedTickets ? (
             <ul className="flex flex-col gap-2">
               {tickets.map((ticket: Ticket) => (
                 <li
@@ -234,6 +272,27 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
                 </li>
               ))}
             </ul>
+          ) : proposedTickets ? (
+            <p className="text-sm text-zinc-500">
+              {proposedTickets.length} proposed ticket
+              {proposedTickets.length === 1 ? "" : "s"} ready for review.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={handleGenerateTickets}
+                disabled={isGenerating}
+                className="self-start rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+              >
+                {isGenerating ? "Generating tickets…" : "Generate tickets"}
+              </button>
+              {generationError && (
+                <p className="text-sm text-red-400" role="alert">
+                  {generationError}
+                </p>
+              )}
+            </div>
           )}
         </section>
       </div>

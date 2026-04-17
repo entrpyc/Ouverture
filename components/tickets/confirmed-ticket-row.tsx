@@ -41,11 +41,12 @@ export function ConfirmedTicketRow({
   const isDone = ticket.status === "done";
   const href = `/projects/${projectId}/tasks/${taskId}/phases/${phaseId}/tickets/${ticket.id}`;
 
-  function handleMarkDone() {
-    if (pending || isDone) return;
+  function handleToggleStatus() {
+    if (pending) return;
+    const next = isDone ? "active" : "done";
     setError(null);
     startTransition(async () => {
-      const result = await updateTicketStatus(ticket.id, "done");
+      const result = await updateTicketStatus(ticket.id, next);
       if (result.error) {
         setError(result.error);
         return;
@@ -76,16 +77,20 @@ export function ConfirmedTicketRow({
           </span>
           <StatusBadge status={ticket.status} />
         </Link>
-        {!isDone && (
-          <button
-            type="button"
-            onClick={handleMarkDone}
-            disabled={pending}
-            className="mr-3 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-          >
-            {pending ? "Marking…" : "Mark done"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleToggleStatus}
+          disabled={pending}
+          className="mr-3 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+        >
+          {pending
+            ? isDone
+              ? "Reopening…"
+              : "Marking…"
+            : isDone
+              ? "Reopen"
+              : "Mark as done"}
+        </button>
       </div>
       {error && (
         <p className="px-4 text-xs text-red-400" role="alert">

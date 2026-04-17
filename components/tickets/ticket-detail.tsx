@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { Ticket, TicketTooling } from "@/lib/types";
+import { updateTicketStatus } from "@/app/actions/tickets";
 import { EditTicketModal } from "./edit-ticket-modal";
 import { DeleteTicketDialog } from "./delete-ticket-dialog";
 import { TicketToolingEditor } from "./ticket-tooling-editor";
@@ -89,11 +91,26 @@ function CopyBlock({ text }: { text: string }) {
 }
 
 export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [toolingEditOpen, setToolingEditOpen] = useState(false);
+  const [statusPending, startStatusTransition] = useTransition();
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const isDone = ticket.status === "done";
+
+  function handleToggleStatus() {
+    if (statusPending) return;
+    const next = isDone ? "active" : "done";
+    setMenuOpen(false);
+    startStatusTransition(async () => {
+      const result = await updateTicketStatus(ticket.id, next);
+      if (result.error) return;
+      router.refresh();
+    });
+  }
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -146,7 +163,7 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
           {menuOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-9 z-10 w-32 overflow-hidden rounded-md border border-zinc-800 bg-zinc-900 shadow-lg"
+              className="absolute right-0 top-9 z-10 w-40 overflow-hidden rounded-md border border-zinc-800 bg-zinc-900 shadow-lg"
             >
               <button
                 type="button"
@@ -158,6 +175,21 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
                 className="block w-full px-3 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800"
               >
                 Edit
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleToggleStatus}
+                disabled={statusPending}
+                className="block w-full px-3 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {statusPending
+                  ? isDone
+                    ? "Reopening…"
+                    : "Marking…"
+                  : isDone
+                    ? "Reopen"
+                    : "Mark as done"}
               </button>
               <button
                 type="button"

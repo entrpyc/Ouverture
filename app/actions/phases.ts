@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUserId } from "@/lib/auth-helpers";
 import { failure, success, type ActionResponse } from "@/lib/action-response";
+import { touchProject } from "@/lib/touch-project";
 import type { Phase, PhaseTooling, Priority, Status, ToolType } from "@/lib/types";
 
 const VALID_STATUSES: readonly Status[] = ["active", "done"] as const;
@@ -117,6 +118,7 @@ export async function createPhase(
       });
     });
 
+    await touchProject({ taskId });
     return success(phase);
   } catch (err) {
     return failure(errorMessage(err));
@@ -170,6 +172,7 @@ export async function updatePhase(
       where: { id: phaseId },
       data: patch,
     });
+    await touchProject({ phaseId });
     return success(phase);
   } catch (err) {
     return failure(errorMessage(err));
@@ -207,6 +210,7 @@ export async function replacePhaseTooling(
       return tx.phaseTooling.findMany({ where: { phaseId } });
     });
 
+    await touchProject({ phaseId });
     return success(result);
   } catch (err) {
     return failure(errorMessage(err));
@@ -220,11 +224,12 @@ export async function deletePhase(
     const userId = await getAuthenticatedUserId();
     const existing = await prisma.phase.findFirst({
       where: { id: phaseId, task: { userId } },
-      select: { id: true },
+      select: { id: true, task: { select: { projectId: true } } },
     });
     if (!existing) return failure("Phase not found");
 
     await prisma.phase.delete({ where: { id: phaseId } });
+    await touchProject({ projectId: existing.task.projectId });
     return success({ id: phaseId });
   } catch (err) {
     return failure(errorMessage(err));
@@ -250,6 +255,7 @@ export async function updatePhaseStatus(
         prisma.phase.update({ where: { id: phaseId }, data: { status: "done" } }),
         prisma.ticket.updateMany({ where: { phaseId }, data: { status: "done" } }),
       ]);
+      await touchProject({ phaseId });
       return success(phase);
     }
 
@@ -257,6 +263,7 @@ export async function updatePhaseStatus(
       where: { id: phaseId },
       data: { status: "active" },
     });
+    await touchProject({ phaseId });
     return success(phase);
   } catch (err) {
     return failure(errorMessage(err));

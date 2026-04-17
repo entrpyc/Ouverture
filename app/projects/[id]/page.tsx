@@ -4,6 +4,7 @@ import { getProject } from "@/app/actions/projects";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ToolingSection } from "@/components/projects/tooling-section";
 import { TaskList } from "@/components/tasks/task-list";
+import { formatAbsolute, formatRelative } from "@/lib/format-date";
 
 export default async function ProjectPage({
   params,
@@ -40,6 +41,15 @@ export default async function ProjectPage({
       </header>
 
       <section className="flex flex-1 flex-col gap-8 px-6 py-6">
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-zinc-500">
+          <span title={formatAbsolute(project.createdAt)}>
+            Created {formatRelative(project.createdAt)}
+          </span>
+          <span title={formatAbsolute(project.updatedAt)}>
+            Last edited {formatRelative(project.updatedAt)}
+          </span>
+        </div>
+
         <div className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
             Spec

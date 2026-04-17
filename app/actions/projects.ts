@@ -14,7 +14,7 @@ export async function getProjects(): Promise<ActionResponse<Project[]>> {
     const userId = await getAuthenticatedUserId();
     const projects = await prisma.project.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { updatedAt: "desc" },
     });
     return success(projects);
   } catch (err) {

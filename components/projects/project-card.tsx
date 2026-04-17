@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/lib/types";
+import { formatAbsolute, formatRelative } from "@/lib/format-date";
 
 type Props = {
   project: Project;
@@ -170,6 +171,12 @@ export function ProjectCard({
       </div>
       <p className="text-sm text-zinc-400">
         {project.spec ? truncate(project.spec, 120) : "No spec yet."}
+      </p>
+      <p
+        className="text-xs text-zinc-500"
+        title={formatAbsolute(project.updatedAt)}
+      >
+        Edited {formatRelative(project.updatedAt)}
       </p>
     </div>
   );

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUserId } from "@/lib/auth-helpers";
 import { failure, success, type ActionResponse } from "@/lib/action-response";
+import { touchProject } from "@/lib/touch-project";
 import type { ProjectTool, ToolType } from "@/lib/types";
 
 const VALID_TOOL_TYPES: readonly ToolType[] = ["agent", "skill", "mcp"] as const;
@@ -34,6 +35,7 @@ export async function addProjectTool(
     const tool = await prisma.projectTool.create({
       data: { projectId, type: data.type, name },
     });
+    await touchProject({ projectId });
     return success(tool);
   } catch (err) {
     return failure(errorMessage(err));
@@ -48,7 +50,7 @@ export async function updateProjectTool(
     const userId = await getAuthenticatedUserId();
     const existing = await prisma.projectTool.findFirst({
       where: { id: toolId, project: { userId } },
-      select: { id: true },
+      select: { id: true, projectId: true },
     });
     if (!existing) return failure("Tool not found");
 
@@ -67,6 +69,7 @@ export async function updateProjectTool(
       where: { id: toolId },
       data: patch,
     });
+    await touchProject({ projectId: existing.projectId });
     return success(tool);
   } catch (err) {
     return failure(errorMessage(err));
@@ -80,11 +83,12 @@ export async function deleteProjectTool(
     const userId = await getAuthenticatedUserId();
     const existing = await prisma.projectTool.findFirst({
       where: { id: toolId, project: { userId } },
-      select: { id: true },
+      select: { id: true, projectId: true },
     });
     if (!existing) return failure("Tool not found");
 
     await prisma.projectTool.delete({ where: { id: toolId } });
+    await touchProject({ projectId: existing.projectId });
     return success({ id: toolId });
   } catch (err) {
     return failure(errorMessage(err));

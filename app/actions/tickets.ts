@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUserId } from "@/lib/auth-helpers";
 import { failure, success, type ActionResponse } from "@/lib/action-response";
+import { touchProject } from "@/lib/touch-project";
 import type { Status, Ticket, TicketTooling, ToolType } from "@/lib/types";
 
 const VALID_STATUSES: readonly Status[] = ["active", "done"] as const;
@@ -135,6 +136,7 @@ export async function createTicket(
       });
     });
 
+    await touchProject({ phaseId });
     return success(ticket as Ticket & { tooling: TicketTooling[] });
   } catch (err) {
     return failure(errorMessage(err));
@@ -189,6 +191,7 @@ export async function createTicketsBulk(
       return results;
     });
 
+    await touchProject({ phaseId });
     return success(created);
   } catch (err) {
     return failure(errorMessage(err));
@@ -260,6 +263,7 @@ export async function updateTicket(
       where: { id: ticketId },
       data: patch,
     });
+    await touchProject({ ticketId });
     return success(ticket as Ticket);
   } catch (err) {
     return failure(errorMessage(err));
@@ -297,6 +301,7 @@ export async function replaceTicketTooling(
       return tx.ticketTooling.findMany({ where: { ticketId } });
     });
 
+    await touchProject({ ticketId });
     return success(result);
   } catch (err) {
     return failure(errorMessage(err));
@@ -310,11 +315,15 @@ export async function deleteTicket(
     const userId = await getAuthenticatedUserId();
     const existing = await prisma.ticket.findFirst({
       where: { id: ticketId, phase: { task: { userId } } },
-      select: { id: true },
+      select: {
+        id: true,
+        phase: { select: { task: { select: { projectId: true } } } },
+      },
     });
     if (!existing) return failure("Ticket not found");
 
     await prisma.ticket.delete({ where: { id: ticketId } });
+    await touchProject({ projectId: existing.phase.task.projectId });
     return success({ id: ticketId });
   } catch (err) {
     return failure(errorMessage(err));
@@ -339,6 +348,7 @@ export async function updateTicketStatus(
       where: { id: ticketId },
       data: { status },
     });
+    await touchProject({ ticketId });
     return success(ticket as Ticket);
   } catch (err) {
     return failure(errorMessage(err));

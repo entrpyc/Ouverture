@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUserId } from "@/lib/auth-helpers";
 import { failure, success, type ActionResponse } from "@/lib/action-response";
+import { touchProject } from "@/lib/touch-project";
 import type { Phase, Status, Task } from "@/lib/types";
 
 const VALID_STATUSES: readonly Status[] = ["active", "done"] as const;
@@ -77,6 +78,7 @@ export async function createTask(
         status: "active",
       },
     });
+    await touchProject({ projectId });
     return success(task);
   } catch (err) {
     return failure(errorMessage(err));
@@ -91,7 +93,7 @@ export async function finalizeTask(
     const userId = await getAuthenticatedUserId();
     const existing = await prisma.task.findFirst({
       where: { id: taskId, userId },
-      select: { id: true },
+      select: { id: true, projectId: true },
     });
     if (!existing) return failure("Task not found");
 
@@ -108,6 +110,7 @@ export async function finalizeTask(
         conversationHistory: data.conversationHistory,
       },
     });
+    await touchProject({ projectId: existing.projectId });
     return success(task);
   } catch (err) {
     return failure(errorMessage(err));
@@ -122,7 +125,7 @@ export async function saveConversation(
     const userId = await getAuthenticatedUserId();
     const existing = await prisma.task.findFirst({
       where: { id: taskId, userId },
-      select: { id: true },
+      select: { id: true, projectId: true },
     });
     if (!existing) return failure("Unauthorized");
 
@@ -130,6 +133,7 @@ export async function saveConversation(
       where: { id: taskId },
       data: { conversationHistory: data.conversationHistory },
     });
+    await touchProject({ projectId: existing.projectId });
     return success(task);
   } catch (err) {
     return failure(errorMessage(err));
@@ -144,7 +148,7 @@ export async function updateTask(
     const userId = await getAuthenticatedUserId();
     const existing = await prisma.task.findFirst({
       where: { id: taskId, userId },
-      select: { id: true },
+      select: { id: true, projectId: true },
     });
     if (!existing) return failure("Task not found");
 
@@ -160,6 +164,7 @@ export async function updateTask(
       where: { id: taskId },
       data: patch,
     });
+    await touchProject({ projectId: existing.projectId });
     return success(task);
   } catch (err) {
     return failure(errorMessage(err));
@@ -173,11 +178,12 @@ export async function deleteTask(
     const userId = await getAuthenticatedUserId();
     const existing = await prisma.task.findFirst({
       where: { id: taskId, userId },
-      select: { id: true },
+      select: { id: true, projectId: true },
     });
     if (!existing) return failure("Task not found");
 
     await prisma.task.delete({ where: { id: taskId } });
+    await touchProject({ projectId: existing.projectId });
     return success({ id: taskId });
   } catch (err) {
     return failure(errorMessage(err));
@@ -194,7 +200,7 @@ export async function updateTaskStatus(
 
     const existing = await prisma.task.findFirst({
       where: { id: taskId, userId },
-      select: { id: true },
+      select: { id: true, projectId: true },
     });
     if (!existing) return failure("Task not found");
 
@@ -207,6 +213,7 @@ export async function updateTaskStatus(
           data: { status: "done" },
         }),
       ]);
+      await touchProject({ projectId: existing.projectId });
       return success(task);
     }
 
@@ -214,6 +221,7 @@ export async function updateTaskStatus(
       where: { id: taskId },
       data: { status: "active" },
     });
+    await touchProject({ projectId: existing.projectId });
     return success(task);
   } catch (err) {
     return failure(errorMessage(err));

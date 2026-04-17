@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Phase, PhaseTooling, Ticket } from "@/lib/types";
 import { EditPhaseModal } from "./edit-phase-modal";
 import { DeletePhaseDialog } from "./delete-phase-dialog";
+import { PhaseToolingEditor } from "./phase-tooling-editor";
 
 type Props = {
   phase: Phase & { tooling: PhaseTooling[] };
@@ -48,6 +49,7 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [toolingEditOpen, setToolingEditOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -149,10 +151,28 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
         </section>
 
         <section className="flex flex-col gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            Tooling
-          </h2>
-          {phase.tooling.length === 0 ? (
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              Tooling
+            </h2>
+            {!toolingEditOpen && (
+              <button
+                type="button"
+                onClick={() => setToolingEditOpen(true)}
+                className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+              >
+                Edit tooling
+              </button>
+            )}
+          </div>
+          {toolingEditOpen ? (
+            <PhaseToolingEditor
+              phaseId={phase.id}
+              tooling={phase.tooling}
+              onCancel={() => setToolingEditOpen(false)}
+              onSaved={() => setToolingEditOpen(false)}
+            />
+          ) : phase.tooling.length === 0 ? (
             <p className="text-sm text-zinc-500">No tooling assigned.</p>
           ) : (
             <ul className="flex flex-col gap-2">

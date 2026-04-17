@@ -46,7 +46,12 @@ export function TaskRow({ projectId, task }: Props) {
   }
 
   return (
-    <div className="relative flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950 transition hover:border-zinc-700 hover:bg-zinc-900">
+    <div
+      className={
+        "relative flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950 transition hover:border-zinc-700 hover:bg-zinc-900 " +
+        (isDone ? "opacity-60" : "")
+      }
+    >
       <Link
         href={`/projects/${projectId}/tasks/${task.id}`}
         className="flex flex-1 items-center justify-between gap-4 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-zinc-600"

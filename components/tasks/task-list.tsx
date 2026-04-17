@@ -1,7 +1,6 @@
 import { getTasksForProject } from "@/app/actions/tasks";
-import type { Task } from "@/lib/types";
 import { NewTaskButton } from "./new-task-button";
-import { TaskRow } from "./task-row";
+import { TaskListGroups } from "./task-list-groups";
 
 type Props = {
   projectId: string;
@@ -24,19 +23,7 @@ export async function TaskList({ projectId }: Props) {
         <p className="text-sm text-red-400">Failed to load tasks: {result.error}</p>
       )}
 
-      {!result.error && tasks.length === 0 ? (
-        <p className="text-sm text-zinc-500">
-          No tasks yet — create one to get started
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {tasks.map((task: Task) => (
-            <li key={task.id}>
-              <TaskRow projectId={projectId} task={task} />
-            </li>
-          ))}
-        </ul>
-      )}
+      {!result.error && <TaskListGroups projectId={projectId} tasks={tasks} />}
     </div>
   );
 }

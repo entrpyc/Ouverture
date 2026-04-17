@@ -11,7 +11,7 @@ type Props = {
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: (project: Project) => void;
-  shiftHeld?: boolean;
+  modHeld?: boolean;
 };
 
 function truncate(text: string, max: number): string {
@@ -26,13 +26,13 @@ export function ProjectCard({
   selectable = false,
   selected = false,
   onToggleSelect,
-  shiftHeld = false,
+  modHeld = false,
 }: Props) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const showAsSelectable = selectable || shiftHeld;
+  const showAsSelectable = selectable || modHeld;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -45,8 +45,8 @@ export function ProjectCard({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  function activate(shiftKey: boolean) {
-    if (selectable || shiftKey) {
+  function activate(modKey: boolean) {
+    if (selectable || modKey) {
       onToggleSelect?.(project);
       return;
     }
@@ -63,11 +63,11 @@ export function ProjectCard({
       aria-checked={showAsSelectable ? selected : undefined}
       aria-label={ariaLabel}
       tabIndex={0}
-      onClick={(e) => activate(e.shiftKey)}
+      onClick={(e) => activate(e.ctrlKey || e.metaKey)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          activate(e.shiftKey);
+          activate(e.ctrlKey || e.metaKey);
         }
       }}
       className={`relative flex cursor-pointer flex-col gap-2 rounded-lg border bg-zinc-900 p-4 transition focus:outline-none focus:ring-2 focus:ring-zinc-600 ${

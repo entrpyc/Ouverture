@@ -19,14 +19,16 @@ export function ProjectsList({ projects }: Props) {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
-  const [shiftHeld, setShiftHeld] = useState(false);
+  const [modHeld, setModHeld] = useState(false);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Shift") setShiftHeld(e.type === "keydown");
+      if (e.key === "Control" || e.key === "Meta") {
+        setModHeld(e.type === "keydown");
+      }
     }
     function onBlur() {
-      setShiftHeld(false);
+      setModHeld(false);
     }
     window.addEventListener("keydown", onKey);
     window.addEventListener("keyup", onKey);
@@ -139,7 +141,7 @@ export function ProjectsList({ projects }: Props) {
               selectable={selectMode}
               selected={selectedIds.has(project.id)}
               onToggleSelect={toggleSelect}
-              shiftHeld={shiftHeld}
+              modHeld={modHeld}
             />
           ))}
         </div>

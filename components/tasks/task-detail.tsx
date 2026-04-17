@@ -2,9 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import type { Phase, Task } from "@/lib/types";
+import type { Phase, Priority, Task, ToolType } from "@/lib/types";
 import { EditTaskModal } from "./edit-task-modal";
 import { DeleteTaskDialog } from "./delete-task-dialog";
+
+export type ProposedPhase = {
+  title: string;
+  description: string;
+  estimateHours: string;
+  priority: Priority;
+  tooling: {
+    type: ToolType;
+    name: string;
+    isNew: boolean;
+    rationale: string | null;
+  }[];
+};
 
 type Props = {
   task: Task & { phases: Phase[] };
@@ -46,7 +59,14 @@ export function TaskDetail({ task, projectId }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [proposedPhases, setProposedPhases] = useState<ProposedPhase[] | null>(
+    null
+  );
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const hasConfirmedPhases = task.phases.length > 0;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -59,8 +79,35 @@ export function TaskDetail({ task, projectId }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  function handleGeneratePhases() {
-    console.log("Generate phases clicked — wiring in Phase 6");
+  async function handleGeneratePhases() {
+    if (isGenerating) return;
+    setGenerationError(null);
+    setIsGenerating(true);
+    try {
+      const response = await fetch("/api/ai/phases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId: task.id }),
+      });
+      if (!response.ok) {
+        let detail = "Phase generation failed";
+        try {
+          const data = await response.json();
+          if (typeof data?.error === "string") detail = data.error;
+        } catch {
+          // leave default
+        }
+        throw new Error(detail);
+      }
+      const phases = (await response.json()) as ProposedPhase[];
+      setProposedPhases(phases);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Phase generation failed";
+      setGenerationError(message);
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   return (
@@ -157,21 +204,10 @@ export function TaskDetail({ task, projectId }: Props) {
         </section>
 
         <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Phases
-            </h2>
-            <button
-              type="button"
-              onClick={handleGeneratePhases}
-              className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-            >
-              Generate phases
-            </button>
-          </div>
-          {task.phases.length === 0 ? (
-            <p className="text-sm text-zinc-500">No phases yet.</p>
-          ) : (
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            Phases
+          </h2>
+          {hasConfirmedPhases ? (
             <ul className="flex flex-col gap-2">
               {task.phases.map((phase: Phase) => (
                 <li
@@ -183,12 +219,45 @@ export function TaskDetail({ task, projectId }: Props) {
                   </span>
                   <PriorityBadge priority={phase.priority} />
                   <span className="text-xs text-zinc-400">
-                    {phase.estimateHours}h
+                    {phase.estimateHours}
                   </span>
                   <StatusBadge status={phase.status} />
                 </li>
               ))}
             </ul>
+          ) : proposedPhases ? (
+            <ul className="flex flex-col gap-2">
+              {proposedPhases.map((phase, i) => (
+                <li
+                  key={i}
+                  className="flex items-center gap-3 rounded-lg border border-dashed border-zinc-700 bg-zinc-900/60 px-4 py-3"
+                >
+                  <span className="flex-1 truncate text-sm text-zinc-100">
+                    {phase.title}
+                  </span>
+                  <PriorityBadge priority={phase.priority} />
+                  <span className="text-xs text-zinc-400">
+                    {phase.estimateHours}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="flex flex-col items-start gap-2">
+              <button
+                type="button"
+                onClick={handleGeneratePhases}
+                disabled={isGenerating}
+                className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+              >
+                {isGenerating ? "Generating phases…" : "Generate phases"}
+              </button>
+              {generationError && (
+                <p className="text-sm text-red-400" role="alert">
+                  {generationError}
+                </p>
+              )}
+            </div>
           )}
         </section>
       </div>

@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { getTasksForProject } from "@/app/actions/tasks";
 import type { Task } from "@/lib/types";
 import { NewTaskButton } from "./new-task-button";
+import { TaskRow } from "./task-row";
 
 type Props = {
   projectId: string;
@@ -30,7 +30,7 @@ export async function TaskList({ projectId }: Props) {
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {tasks.map((task) => (
+          {tasks.map((task: Task) => (
             <li key={task.id}>
               <TaskRow projectId={projectId} task={task} />
             </li>
@@ -38,26 +38,5 @@ export async function TaskList({ projectId }: Props) {
         </ul>
       )}
     </div>
-  );
-}
-
-function TaskRow({ projectId, task }: { projectId: string; task: Task }) {
-  const isDone = task.status === "done";
-  return (
-    <Link
-      href={`/projects/${projectId}/tasks/${task.id}`}
-      className="flex items-center justify-between gap-4 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2.5 transition hover:border-zinc-700 hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-    >
-      <span className="truncate text-sm text-zinc-100">{task.title}</span>
-      <span
-        className={
-          isDone
-            ? "rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-xs text-zinc-500"
-            : "rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-xs text-zinc-200"
-        }
-      >
-        {isDone ? "done" : "active"}
-      </span>
-    </Link>
   );
 }

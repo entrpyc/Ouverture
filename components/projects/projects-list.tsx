@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Project } from "@/lib/types";
 import { ProjectCard } from "./project-card";
 import { NewProjectButton } from "./new-project-button";
@@ -19,6 +19,24 @@ export function ProjectsList({ projects }: Props) {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [shiftHeld, setShiftHeld] = useState(false);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Shift") setShiftHeld(e.type === "keydown");
+    }
+    function onBlur() {
+      setShiftHeld(false);
+    }
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("keyup", onKey);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKey);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
 
   const visibleIds = useMemo(() => projects.map((p) => p.id), [projects]);
   const selectedCount = selectedIds.size;
@@ -31,6 +49,7 @@ export function ProjectsList({ projects }: Props) {
   }
 
   function toggleSelect(project: Project) {
+    if (!selectMode) setSelectMode(true);
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(project.id)) {
@@ -120,6 +139,7 @@ export function ProjectsList({ projects }: Props) {
               selectable={selectMode}
               selected={selectedIds.has(project.id)}
               onToggleSelect={toggleSelect}
+              shiftHeld={shiftHeld}
             />
           ))}
         </div>

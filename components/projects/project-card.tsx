@@ -11,6 +11,7 @@ type Props = {
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: (project: Project) => void;
+  shiftHeld?: boolean;
 };
 
 function truncate(text: string, max: number): string {
@@ -25,10 +26,13 @@ export function ProjectCard({
   selectable = false,
   selected = false,
   onToggleSelect,
+  shiftHeld = false,
 }: Props) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const showAsSelectable = selectable || shiftHeld;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -41,40 +45,40 @@ export function ProjectCard({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  function activate() {
-    if (selectable) {
+  function activate(shiftKey: boolean) {
+    if (selectable || shiftKey) {
       onToggleSelect?.(project);
       return;
     }
     router.push(`/projects/${project.id}`);
   }
 
-  const ariaLabel = selectable
+  const ariaLabel = showAsSelectable
     ? `${selected ? "Deselect" : "Select"} ${project.name}`
     : undefined;
 
   return (
     <div
-      role={selectable ? "checkbox" : "button"}
-      aria-checked={selectable ? selected : undefined}
+      role={showAsSelectable ? "checkbox" : "button"}
+      aria-checked={showAsSelectable ? selected : undefined}
       aria-label={ariaLabel}
       tabIndex={0}
-      onClick={activate}
+      onClick={(e) => activate(e.shiftKey)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          activate();
+          activate(e.shiftKey);
         }
       }}
       className={`relative flex cursor-pointer flex-col gap-2 rounded-lg border bg-zinc-900 p-4 transition focus:outline-none focus:ring-2 focus:ring-zinc-600 ${
-        selectable && selected
+        selected
           ? "border-zinc-500 bg-zinc-800/60"
           : "border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/80"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-2">
-          {selectable && (
+          {showAsSelectable && (
             <span
               aria-hidden="true"
               className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
@@ -104,7 +108,7 @@ export function ProjectCard({
           )}
           <h3 className="text-base font-medium text-zinc-100">{project.name}</h3>
         </div>
-        {!selectable && (
+        {!showAsSelectable && (
           <div ref={menuRef} className="relative">
             <button
               type="button"

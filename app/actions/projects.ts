@@ -103,3 +103,19 @@ export async function deleteProject(
     return failure(errorMessage(err));
   }
 }
+
+export async function deleteProjects(
+  projectIds: string[]
+): Promise<ActionResponse<{ count: number }>> {
+  try {
+    const userId = await getAuthenticatedUserId();
+    if (projectIds.length === 0) return success({ count: 0 });
+
+    const result = await prisma.project.deleteMany({
+      where: { id: { in: projectIds }, userId },
+    });
+    return success({ count: result.count });
+  } catch (err) {
+    return failure(errorMessage(err));
+  }
+}

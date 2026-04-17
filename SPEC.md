@@ -142,7 +142,7 @@ Called on ticket generation. Receives phase details and task requirements. Retur
 
 ## Technical constraints
 
-- Next.js 14+ App Router
+- Next.js 16 App Router
 - Dark theme only — no light mode, no toggle
 - NextAuth.js v5 for authentication
 - Prisma + SQLite for data storage

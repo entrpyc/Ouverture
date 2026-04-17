@@ -5,6 +5,7 @@ import { ProjectHeader } from "@/components/projects/project-header";
 import { ToolingSection } from "@/components/projects/tooling-section";
 import { TaskList } from "@/components/tasks/task-list";
 import { BurgerMenu } from "@/components/burger-menu";
+import { SpecActions } from "@/components/projects/spec-actions";
 import { formatAbsolute, formatRelative } from "@/lib/format-date";
 
 export default async function ProjectPage({
@@ -57,9 +58,12 @@ export default async function ProjectPage({
         </div>
 
         <div className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            Spec
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              Spec
+            </h2>
+            {project.spec && <SpecActions spec={project.spec} />}
+          </div>
           <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             {project.spec ? (
               <p className="whitespace-pre-wrap text-sm text-zinc-200">

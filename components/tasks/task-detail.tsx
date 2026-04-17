@@ -228,6 +228,7 @@ export function TaskDetail({ task, projectId }: Props) {
             </ul>
           ) : proposedPhases ? (
             <ProposedPhasesReview
+              taskId={task.id}
               proposedPhases={proposedPhases}
               onCancel={() => setProposedPhases(null)}
             />

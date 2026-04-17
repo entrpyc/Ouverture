@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createPhase } from "@/app/actions/phases";
 import type { ProposedPhase } from "@/components/tasks/task-detail";
 import { ProposedPhaseCard, toolKey } from "./proposed-phase-card";
 
 type Props = {
+  taskId: string;
   proposedPhases: ProposedPhase[];
   onCancel: () => void;
 };
@@ -15,10 +18,17 @@ function initialSelection(phases: ProposedPhase[]): Set<string>[] {
   );
 }
 
-export function ProposedPhasesReview({ proposedPhases, onCancel }: Props) {
+export function ProposedPhasesReview({
+  taskId,
+  proposedPhases,
+  onCancel,
+}: Props) {
+  const router = useRouter();
   const [selections, setSelections] = useState<Set<string>[]>(() =>
     initialSelection(proposedPhases)
   );
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleToggle(phaseIndex: number, key: string) {
     setSelections((prev) => {
@@ -30,16 +40,45 @@ export function ProposedPhasesReview({ proposedPhases, onCancel }: Props) {
     });
   }
 
-  function handleConfirm() {
-    console.log(
-      "Confirm phases clicked — wiring in next ticket",
-      proposedPhases.map((phase, i) => ({
-        ...phase,
-        tooling: phase.tooling.filter((t) =>
-          selections[i].has(toolKey(t.type, t.name))
-        ),
-      }))
+  async function handleConfirm() {
+    if (isConfirming) return;
+    setError(null);
+    setIsConfirming(true);
+
+    const results = await Promise.allSettled(
+      proposedPhases.map((phase, i) => {
+        const selectedKeys = selections[i];
+        const tooling = phase.tooling
+          .filter((t) => selectedKeys.has(toolKey(t.type, t.name)))
+          .map((t) => ({
+            type: t.type,
+            name: t.name,
+            isNew: t.isNew,
+            rationale: t.rationale ?? undefined,
+          }));
+        return createPhase(taskId, {
+          title: phase.title,
+          description: phase.description,
+          estimateHours: phase.estimateHours,
+          priority: phase.priority,
+          tooling,
+        });
+      })
     );
+
+    const anyFailed = results.some(
+      (r) => r.status === "rejected" || (r.status === "fulfilled" && r.value.error)
+    );
+
+    if (anyFailed) {
+      setError(
+        "Some phases could not be saved. Please delete any partially saved phases and try again."
+      );
+      setIsConfirming(false);
+      return;
+    }
+
+    router.refresh();
   }
 
   return (
@@ -55,20 +94,27 @@ export function ProposedPhasesReview({ proposedPhases, onCancel }: Props) {
           </li>
         ))}
       </ul>
+      {error && (
+        <p className="text-sm text-red-400" role="alert">
+          {error}
+        </p>
+      )}
       <div className="flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+          disabled={isConfirming}
+          className="rounded-md px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
         >
           Cancel
         </button>
         <button
           type="button"
           onClick={handleConfirm}
-          className="rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-400"
+          disabled={isConfirming}
+          className="rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-400"
         >
-          Confirm phases
+          {isConfirming ? "Saving phases…" : "Confirm phases"}
         </button>
       </div>
     </div>

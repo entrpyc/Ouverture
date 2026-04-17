@@ -49,7 +49,12 @@ export async function POST(request: Request) {
     where: { id: phaseId, task: { userId } },
     include: {
       tooling: true,
-      task: { select: { requirements: true } },
+      task: {
+        select: {
+          requirements: true,
+          project: { select: { name: true, spec: true } },
+        },
+      },
     },
   });
   if (!phase) {
@@ -70,6 +75,8 @@ export async function POST(request: Request) {
   const userMessage: AIMessage = {
     role: "user",
     content: JSON.stringify({
+      projectName: phase.task.project.name,
+      projectSpec: phase.task.project.spec ?? "",
       phaseDetails: {
         title: phase.title,
         description: phase.description,

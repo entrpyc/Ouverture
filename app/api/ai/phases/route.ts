@@ -69,6 +69,8 @@ export async function POST(request: Request) {
   const userMessage: AIMessage = {
     role: "user",
     content: JSON.stringify({
+      projectName: task.project.name,
+      projectSpec: task.project.spec ?? "",
       taskRequirements: task.requirements,
       projectTooling,
     }),

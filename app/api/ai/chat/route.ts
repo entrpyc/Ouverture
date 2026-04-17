@@ -52,10 +52,16 @@ export async function POST(request: Request) {
   }
 
   const projectTools = project.tools.map((t) => ({ type: t.type, name: t.name }));
+  const projectSpec =
+    typeof project.spec === "string" && project.spec.trim().length > 0
+      ? project.spec.trim()
+      : "(no project spec provided)";
   const systemMessage: AIMessage = {
     role: "system",
     content:
       REQUIREMENTS_ANALYST.content +
+      `\n\nProject name: ${project.name}` +
+      `\n\nProject spec:\n${projectSpec}` +
       "\n\nProject tooling available: " +
       JSON.stringify(projectTools),
   };

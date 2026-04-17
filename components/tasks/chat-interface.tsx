@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { finalizeTask } from "@/app/actions/tasks";
+import { finalizeTask, saveConversation } from "@/app/actions/tasks";
 import { parseMessageContent } from "@/lib/parse-tooling-suggestions";
 import type { ProjectTool, Task } from "@/lib/types";
 
@@ -153,10 +153,27 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
+  const hasMountedRef = useRef(false);
+  const messagesRef = useRef(messages);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    if (isStreaming) return;
+    const current = messagesRef.current;
+    if (current.length === 0) return;
+    void saveConversation(task.id, { conversationHistory: current });
+  }, [isStreaming, task.id]);
 
   const canSend = input.trim().length > 0 && !isStreaming && !isFinalizing;
   const canFinalize =

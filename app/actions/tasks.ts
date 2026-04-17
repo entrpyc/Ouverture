@@ -114,6 +114,28 @@ export async function finalizeTask(
   }
 }
 
+export async function saveConversation(
+  taskId: string,
+  data: { conversationHistory: object[] }
+): Promise<ActionResponse<Task>> {
+  try {
+    const userId = await getAuthenticatedUserId();
+    const existing = await prisma.task.findFirst({
+      where: { id: taskId, userId },
+      select: { id: true },
+    });
+    if (!existing) return failure("Unauthorized");
+
+    const task = await prisma.task.update({
+      where: { id: taskId },
+      data: { conversationHistory: data.conversationHistory },
+    });
+    return success(task);
+  } catch (err) {
+    return failure(errorMessage(err));
+  }
+}
+
 export async function updateTask(
   taskId: string,
   data: { title?: string; requirements?: string }

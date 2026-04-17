@@ -8,6 +8,7 @@ import { updateTicketStatus } from "@/app/actions/tickets";
 import { EditTicketModal } from "./edit-ticket-modal";
 import { DeleteTicketDialog } from "./delete-ticket-dialog";
 import { TicketToolingEditor } from "./ticket-tooling-editor";
+import { BurgerMenu } from "@/components/burger-menu";
 
 type Props = {
   ticket: Ticket & { tooling: TicketTooling[] };
@@ -206,6 +207,7 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
             </div>
           )}
         </div>
+        <BurgerMenu />
         </div>
       </header>
 

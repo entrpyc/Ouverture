@@ -11,6 +11,7 @@ import { PhaseToolingEditor } from "./phase-tooling-editor";
 import { ProposedTicketsReview } from "@/components/tickets/proposed-tickets-review";
 import { ConfirmedTicketRow } from "@/components/tickets/confirmed-ticket-row";
 import { ThinkingEmoji } from "@/components/thinking-emoji";
+import { BurgerMenu } from "@/components/burger-menu";
 
 export type ProposedTicket = {
   title: string;
@@ -224,6 +225,7 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
             </div>
           )}
         </div>
+        <BurgerMenu />
         </div>
       </header>
 

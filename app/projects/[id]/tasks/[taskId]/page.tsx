@@ -4,6 +4,7 @@ import { getTask } from "@/app/actions/tasks";
 import { getProject } from "@/app/actions/projects";
 import { ChatInterface } from "@/components/tasks/chat-interface";
 import { TaskDetail } from "@/components/tasks/task-detail";
+import { BurgerMenu } from "@/components/burger-menu";
 
 export default async function TaskPage({
   params,
@@ -59,6 +60,9 @@ export default async function TaskPage({
           <h1 className="truncate text-base font-semibold tracking-tight text-zinc-100">
             {task.title}
           </h1>
+          <div className="ml-auto">
+            <BurgerMenu />
+          </div>
         </div>
       </header>
 

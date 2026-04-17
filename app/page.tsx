@@ -1,5 +1,6 @@
 import { getProjects } from "@/app/actions/projects";
 import { ProjectsList } from "@/components/projects/projects-list";
+import { BurgerMenu } from "@/components/burger-menu";
 
 export default async function Home() {
   const result = await getProjects();
@@ -12,6 +13,7 @@ export default async function Home() {
           <span className="text-base font-semibold tracking-tight text-zinc-100">
             Ouverture
           </span>
+          <BurgerMenu />
         </div>
       </header>
       <section className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col px-6 py-6 pt-[calc(5rem+1.5rem)]">

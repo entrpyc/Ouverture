@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BurgerMenu } from "@/components/burger-menu";
 
 export default function HelpPage() {
   return (
@@ -23,6 +24,9 @@ export default function HelpPage() {
           <h1 className="text-base font-semibold tracking-tight text-zinc-100">
             How to use Ouverture
           </h1>
+          <div className="ml-auto">
+            <BurgerMenu />
+          </div>
         </div>
       </header>
 

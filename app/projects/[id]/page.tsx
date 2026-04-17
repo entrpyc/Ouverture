@@ -4,6 +4,7 @@ import { getProject } from "@/app/actions/projects";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ToolingSection } from "@/components/projects/tooling-section";
 import { TaskList } from "@/components/tasks/task-list";
+import { BurgerMenu } from "@/components/burger-menu";
 import { formatAbsolute, formatRelative } from "@/lib/format-date";
 
 export default async function ProjectPage({
@@ -39,6 +40,9 @@ export default async function ProjectPage({
             </svg>
           </Link>
           <ProjectHeader project={project} />
+          <div className="ml-auto">
+            <BurgerMenu />
+          </div>
         </div>
       </header>
 

@@ -10,6 +10,7 @@ import { DeleteTaskDialog } from "./delete-task-dialog";
 import { ProposedPhasesReview } from "@/components/phases/proposed-phases-review";
 import { ConfirmedPhaseRow } from "@/components/phases/confirmed-phase-row";
 import { ThinkingEmoji } from "@/components/thinking-emoji";
+import { BurgerMenu } from "@/components/burger-menu";
 
 export type ProposedPhase = {
   title: string;
@@ -226,6 +227,7 @@ export function TaskDetail({ task, projectId }: Props) {
             </div>
           )}
         </div>
+        <BurgerMenu />
         </div>
       </header>
 

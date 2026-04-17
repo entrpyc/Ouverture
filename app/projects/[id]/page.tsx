@@ -21,26 +21,28 @@ export default async function ProjectPage({
 
   return (
     <main className="flex min-h-screen flex-col">
-      <header className="flex items-center gap-4 border-b border-zinc-800 px-6 py-4">
-        <Link
-          href="/"
-          aria-label="Back to projects"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path
-              d="M10 3L5 8l5 5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-        <ProjectHeader project={project} />
+      <header className="border-b border-zinc-800">
+        <div className="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-6 py-4">
+          <Link
+            href="/"
+            aria-label="Back to projects"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M10 3L5 8l5 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+          <ProjectHeader project={project} />
+        </div>
       </header>
 
-      <section className="flex flex-1 flex-col gap-8 px-6 py-6">
+      <section className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-8 px-6 py-6">
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-zinc-500">
           <span title={formatAbsolute(project.createdAt)}>
             Created {formatRelative(project.createdAt)}

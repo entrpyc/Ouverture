@@ -117,7 +117,8 @@ export function TaskDetail({ task, projectId }: Props) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center gap-3 border-b border-zinc-800 px-6 py-4">
+      <header className="border-b border-zinc-800">
+        <div className="mx-auto flex w-full max-w-[1280px] items-center gap-3 px-6 py-4">
         <Link
           href={`/projects/${projectId}`}
           aria-label="Back to project"
@@ -209,9 +210,10 @@ export function TaskDetail({ task, projectId }: Props) {
             </div>
           )}
         </div>
+        </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-6 px-6 py-6">
+      <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-6 py-6">
         <section className="flex flex-col gap-2">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
             Requirements

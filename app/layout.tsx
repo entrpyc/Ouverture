@@ -37,9 +37,7 @@ export default function RootLayout({
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col">
-          {children}
-        </div>
+        <div className="flex flex-1 flex-col">{children}</div>
         <footer className="border-t border-zinc-800 text-xs text-zinc-500">
           <div className="mx-auto flex w-full max-w-[1280px] flex-col items-center gap-2 px-6 py-4 sm:flex-row sm:justify-between">
             <div className="flex items-center gap-4">

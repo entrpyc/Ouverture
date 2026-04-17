@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTicketsBulk } from "@/app/actions/tickets";
+import { saveProposedTickets } from "@/app/actions/phases";
 import type { ProposedTicket } from "@/components/phases/phase-detail";
 import {
   ProposedTicketCard,
@@ -122,6 +123,7 @@ export function ProposedTicketsReview({
       return;
     }
 
+    await saveProposedTickets(phaseId, null);
     router.refresh();
   }
 

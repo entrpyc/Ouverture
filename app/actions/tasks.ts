@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUserId } from "@/lib/auth-helpers";
 import { failure, success, type ActionResponse } from "@/lib/action-response";
@@ -132,6 +133,34 @@ export async function saveConversation(
     const task = await prisma.task.update({
       where: { id: taskId },
       data: { conversationHistory: data.conversationHistory },
+    });
+    await touchProject({ projectId: existing.projectId });
+    return success(task);
+  } catch (err) {
+    return failure(errorMessage(err));
+  }
+}
+
+export async function saveProposedPhases(
+  taskId: string,
+  proposedPhases: object[] | null
+): Promise<ActionResponse<Task>> {
+  try {
+    const userId = await getAuthenticatedUserId();
+    const existing = await prisma.task.findFirst({
+      where: { id: taskId, userId },
+      select: { id: true, projectId: true },
+    });
+    if (!existing) return failure("Task not found");
+
+    const task = await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        proposedPhases:
+          proposedPhases === null
+            ? Prisma.DbNull
+            : (proposedPhases as Prisma.InputJsonValue),
+      },
     });
     await touchProject({ projectId: existing.projectId });
     return success(task);

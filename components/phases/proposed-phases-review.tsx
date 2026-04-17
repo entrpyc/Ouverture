@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPhase } from "@/app/actions/phases";
+import { saveProposedPhases } from "@/app/actions/tasks";
 import type { ProposedPhase } from "@/components/tasks/task-detail";
 import { ProposedPhaseCard, toolKey } from "./proposed-phase-card";
 
@@ -78,6 +79,7 @@ export function ProposedPhasesReview({
       return;
     }
 
+    await saveProposedPhases(taskId, null);
     router.refresh();
   }
 

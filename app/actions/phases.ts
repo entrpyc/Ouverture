@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUserId } from "@/lib/auth-helpers";
 import { failure, success, type ActionResponse } from "@/lib/action-response";
@@ -119,6 +120,34 @@ export async function createPhase(
     });
 
     await touchProject({ taskId });
+    return success(phase);
+  } catch (err) {
+    return failure(errorMessage(err));
+  }
+}
+
+export async function saveProposedTickets(
+  phaseId: string,
+  proposedTickets: object[] | null
+): Promise<ActionResponse<Phase>> {
+  try {
+    const userId = await getAuthenticatedUserId();
+    const existing = await prisma.phase.findFirst({
+      where: { id: phaseId, task: { userId } },
+      select: { id: true },
+    });
+    if (!existing) return failure("Phase not found");
+
+    const phase = await prisma.phase.update({
+      where: { id: phaseId },
+      data: {
+        proposedTickets:
+          proposedTickets === null
+            ? Prisma.DbNull
+            : (proposedTickets as Prisma.InputJsonValue),
+      },
+    });
+    await touchProject({ phaseId });
     return success(phase);
   } catch (err) {
     return failure(errorMessage(err));

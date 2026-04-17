@@ -50,6 +50,7 @@ model Task {
   title               String
   requirements        String?
   conversationHistory Json?
+  proposedPhases      Json?
   status              String   @default("active") // active | done
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -60,13 +61,14 @@ model Task {
 }
 
 model Phase {
-  id            String @id @default(cuid())
-  taskId        String
-  title         String
-  description   String
-  estimateHours String
-  priority      String // high | medium | low
-  status        String @default("active") // active | done
+  id              String @id @default(cuid())
+  taskId          String
+  title           String
+  description     String
+  estimateHours   String
+  priority        String // high | medium | low
+  status          String @default("active") // active | done
+  proposedTickets Json?
 
   task    Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
   tooling PhaseTooling[]

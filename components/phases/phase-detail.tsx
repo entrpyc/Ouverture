@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Phase, PhaseTooling, Ticket, ToolType } from "@/lib/types";
-import { updatePhaseStatus } from "@/app/actions/phases";
+import { saveProposedTickets, updatePhaseStatus } from "@/app/actions/phases";
 import { EditPhaseModal } from "./edit-phase-modal";
 import { DeletePhaseDialog } from "./delete-phase-dialog";
 import { PhaseToolingEditor } from "./phase-tooling-editor";
@@ -73,7 +73,7 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [proposedTickets, setProposedTickets] = useState<
     ProposedTicket[] | null
-  >(null);
+  >((phase.proposedTickets as ProposedTicket[] | null) ?? null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [statusPending, startStatusTransition] = useTransition();
   const [doneTicketsOpen, setDoneTicketsOpen] = useState(false);
@@ -128,6 +128,7 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
       }
       const ticketsJson = (await response.json()) as ProposedTicket[];
       setProposedTickets(ticketsJson);
+      void saveProposedTickets(phase.id, ticketsJson);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Ticket generation failed";
@@ -362,7 +363,10 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
             <ProposedTicketsReview
               phaseId={phase.id}
               proposedTickets={proposedTickets}
-              onCancel={() => setProposedTickets(null)}
+              onCancel={() => {
+                setProposedTickets(null);
+                void saveProposedTickets(phase.id, null);
+              }}
             />
           ) : (
             <div className="flex flex-col gap-2">

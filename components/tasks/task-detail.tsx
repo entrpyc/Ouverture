@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Phase, Priority, Task, ToolType } from "@/lib/types";
-import { updateTaskStatus } from "@/app/actions/tasks";
+import { saveProposedPhases, updateTaskStatus } from "@/app/actions/tasks";
 import { EditTaskModal } from "./edit-task-modal";
 import { DeleteTaskDialog } from "./delete-task-dialog";
 import { ProposedPhasesReview } from "@/components/phases/proposed-phases-review";
@@ -50,7 +50,7 @@ export function TaskDetail({ task, projectId }: Props) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [proposedPhases, setProposedPhases] = useState<ProposedPhase[] | null>(
-    null
+    (task.proposedPhases as ProposedPhase[] | null) ?? null
   );
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [statusPending, startStatusTransition] = useTransition();
@@ -106,6 +106,7 @@ export function TaskDetail({ task, projectId }: Props) {
       }
       const phases = (await response.json()) as ProposedPhase[];
       setProposedPhases(phases);
+      void saveProposedPhases(task.id, phases);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Phase generation failed";
@@ -293,7 +294,10 @@ export function TaskDetail({ task, projectId }: Props) {
             <ProposedPhasesReview
               taskId={task.id}
               proposedPhases={proposedPhases}
-              onCancel={() => setProposedPhases(null)}
+              onCancel={() => {
+                setProposedPhases(null);
+                void saveProposedPhases(task.id, null);
+              }}
             />
           ) : (
             <div className="flex flex-col items-start gap-2">

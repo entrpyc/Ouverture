@@ -125,7 +125,7 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-zinc-800">
+      <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-3 px-6">
         <Link
           href={`/projects/${projectId}/tasks/${taskId}/phases/${phaseId}`}
@@ -209,7 +209,7 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
         </div>
       </header>
 
-      <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-6 py-6">
+      <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-6 py-6 pt-[calc(5rem+1.5rem)]">
         {ticket.description && (
           <section className="flex flex-col gap-2">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">

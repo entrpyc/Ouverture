@@ -39,7 +39,7 @@ export default async function TaskPage({
 
   return (
     <main className="flex min-h-screen flex-col">
-      <header className="border-b border-zinc-800">
+      <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-4 px-6">
           <Link
             href={`/projects/${id}`}
@@ -62,7 +62,7 @@ export default async function TaskPage({
         </div>
       </header>
 
-      <section className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col px-6 py-6">
+      <section className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col px-6 py-6 pt-[calc(5rem+1.5rem)]">
         <ChatInterface task={task} projectId={id} projectTools={project.tools} />
       </section>
     </main>

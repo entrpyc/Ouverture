@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function HelpPage() {
   return (
     <main className="flex min-h-screen flex-col">
-      <header className="border-b border-zinc-800">
+      <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-4 px-6">
           <Link
             href="/"
@@ -26,7 +26,7 @@ export default function HelpPage() {
         </div>
       </header>
 
-      <section className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10 px-6 py-8">
+      <section className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10 px-6 py-8 pt-[calc(5rem+2rem)]">
         <div className="flex flex-col gap-3">
           <p className="text-sm text-zinc-300">
             Ouverture helps you plan and execute Claude Code work. You describe

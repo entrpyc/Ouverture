@@ -21,7 +21,7 @@ export default async function ProjectPage({
 
   return (
     <main className="flex min-h-screen flex-col">
-      <header className="border-b border-zinc-800">
+      <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-4 px-6">
           <Link
             href="/"
@@ -42,7 +42,7 @@ export default async function ProjectPage({
         </div>
       </header>
 
-      <section className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-8 px-6 py-6">
+      <section className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-8 px-6 py-6 pt-[calc(5rem+1.5rem)]">
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-zinc-500">
           <span title={formatAbsolute(project.createdAt)}>
             Created {formatRelative(project.createdAt)}

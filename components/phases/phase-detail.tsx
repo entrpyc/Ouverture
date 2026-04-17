@@ -6,6 +6,7 @@ import type { Phase, PhaseTooling, Ticket, ToolType } from "@/lib/types";
 import { EditPhaseModal } from "./edit-phase-modal";
 import { DeletePhaseDialog } from "./delete-phase-dialog";
 import { PhaseToolingEditor } from "./phase-tooling-editor";
+import { ProposedTicketsReview } from "@/components/tickets/proposed-tickets-review";
 
 export type ProposedTicket = {
   title: string;
@@ -273,10 +274,11 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
               ))}
             </ul>
           ) : proposedTickets ? (
-            <p className="text-sm text-zinc-500">
-              {proposedTickets.length} proposed ticket
-              {proposedTickets.length === 1 ? "" : "s"} ready for review.
-            </p>
+            <ProposedTicketsReview
+              phaseId={phase.id}
+              proposedTickets={proposedTickets}
+              onCancel={() => setProposedTickets(null)}
+            />
           ) : (
             <div className="flex flex-col gap-2">
               <button

@@ -31,13 +31,12 @@ function pickThreeEmojis() {
 }
 
 export function ThinkingEmoji({ intervalMs = 3000 }: { intervalMs?: number }) {
-  const [emojis] = useState(pickThreeEmojis);
-  const [index, setIndex] = useState(0);
+  const [emojis, setEmojis] = useState(pickThreeEmojis);
   useEffect(() => {
     const id = setInterval(() => {
-      setIndex((i) => (i + 1) % emojis.length);
+      setEmojis(pickThreeEmojis());
     }, intervalMs);
     return () => clearInterval(id);
-  }, [emojis.length, intervalMs]);
-  return <span aria-label="thinking">{emojis[index]}</span>;
+  }, [intervalMs]);
+  return <span aria-label="thinking">{emojis.join(" ")}</span>;
 }

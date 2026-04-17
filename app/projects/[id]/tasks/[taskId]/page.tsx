@@ -40,7 +40,7 @@ export default async function TaskPage({
   return (
     <main className="flex min-h-screen flex-col">
       <header className="border-b border-zinc-800">
-        <div className="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-6 py-4">
+        <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-4 px-6">
           <Link
             href={`/projects/${id}`}
             aria-label="Back to project"

@@ -8,7 +8,7 @@ export default async function Home() {
   return (
     <main className="flex min-h-screen flex-col">
       <header className="border-b border-zinc-800">
-        <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-6 py-4">
+        <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center justify-between px-6">
           <span className="text-base font-semibold tracking-tight text-zinc-100">
             Ouverture
           </span>

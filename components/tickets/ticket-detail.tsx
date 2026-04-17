@@ -126,7 +126,7 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
   return (
     <div className="flex flex-1 flex-col">
       <header className="border-b border-zinc-800">
-        <div className="mx-auto flex w-full max-w-[1280px] items-center gap-3 px-6 py-4">
+        <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-3 px-6">
         <Link
           href={`/projects/${projectId}/tasks/${taskId}/phases/${phaseId}`}
           aria-label="Back to phase"

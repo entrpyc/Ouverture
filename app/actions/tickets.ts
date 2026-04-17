@@ -84,7 +84,7 @@ export async function getTicketsForPhase(
       include: { tooling: true },
       orderBy: { order: "asc" },
     });
-    return success(tickets);
+    return success(tickets as (Ticket & { tooling: TicketTooling[] })[]);
   } catch (err) {
     return failure(errorMessage(err));
   }
@@ -135,7 +135,7 @@ export async function createTicket(
       });
     });
 
-    return success(ticket);
+    return success(ticket as Ticket & { tooling: TicketTooling[] });
   } catch (err) {
     return failure(errorMessage(err));
   }
@@ -161,7 +161,7 @@ export async function createTicketsBulk(
     const created = await prisma.$transaction(async (tx) => {
       const results: Ticket[] = [];
       for (const input of tickets) {
-        const ticket = await tx.ticket.create({
+        const raw = await tx.ticket.create({
           data: {
             phaseId,
             title: input.title.trim(),
@@ -176,7 +176,7 @@ export async function createTicketsBulk(
         if (input.tooling.length > 0) {
           await tx.ticketTooling.createMany({
             data: input.tooling.map((t) => ({
-              ticketId: ticket.id,
+              ticketId: raw.id,
               type: t.type,
               name: t.name.trim(),
               isNew: t.isNew,
@@ -184,7 +184,7 @@ export async function createTicketsBulk(
             })),
           });
         }
-        results.push(ticket);
+        results.push(raw as Ticket);
       }
       return results;
     });
@@ -260,7 +260,7 @@ export async function updateTicket(
       where: { id: ticketId },
       data: patch,
     });
-    return success(ticket);
+    return success(ticket as Ticket);
   } catch (err) {
     return failure(errorMessage(err));
   }
@@ -339,7 +339,7 @@ export async function updateTicketStatus(
       where: { id: ticketId },
       data: { status },
     });
-    return success(ticket);
+    return success(ticket as Ticket);
   } catch (err) {
     return failure(errorMessage(err));
   }

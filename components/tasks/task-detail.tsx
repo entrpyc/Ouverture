@@ -12,6 +12,7 @@ import { ThinkingEmoji } from "@/components/thinking-emoji";
 import { BurgerMenu } from "@/components/burger-menu";
 import { BackLink } from "@/components/back-link";
 import { AssumptionsCard } from "@/components/assumptions-card";
+import { Breadcrumb, type BreadcrumbSibling } from "@/components/breadcrumb";
 
 export type ProposedPhase = {
   title: string;
@@ -29,6 +30,9 @@ export type ProposedPhase = {
 type Props = {
   task: Task & { phases: Phase[] };
   projectId: string;
+  projectName: string;
+  projectSiblings: BreadcrumbSibling[];
+  taskSiblings: BreadcrumbSibling[];
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -46,7 +50,13 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export function TaskDetail({ task, projectId }: Props) {
+export function TaskDetail({
+  task,
+  projectId,
+  projectName,
+  projectSiblings,
+  taskSiblings,
+}: Props) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -138,9 +148,23 @@ export function TaskDetail({ task, projectId }: Props) {
       <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-3 px-6">
         <BackLink href={`/projects/${projectId}`} label="Back to project" />
-        <h1 className="flex-1 truncate text-base font-semibold tracking-tight text-zinc-100">
-          {task.title}
-        </h1>
+        <Breadcrumb
+          segments={[
+            { label: "Ouverture", href: "/" },
+            {
+              label: projectName,
+              href: `/projects/${projectId}`,
+              siblings: projectSiblings,
+              currentId: projectId,
+            },
+            {
+              label: task.title,
+              href: null,
+              siblings: taskSiblings,
+              currentId: task.id,
+            },
+          ]}
+        />
         <StatusBadge status={task.status} />
         <div ref={menuRef} className="relative">
           <button

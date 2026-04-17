@@ -12,6 +12,7 @@ import { ConfirmedTicketRow } from "@/components/tickets/confirmed-ticket-row";
 import { ThinkingEmoji } from "@/components/thinking-emoji";
 import { BurgerMenu } from "@/components/burger-menu";
 import { BackLink } from "@/components/back-link";
+import { Breadcrumb, type BreadcrumbSibling } from "@/components/breadcrumb";
 
 export type ProposedTicket = {
   title: string;
@@ -33,6 +34,11 @@ type Props = {
   tickets: Ticket[];
   projectId: string;
   taskId: string;
+  projectName: string;
+  taskTitle: string;
+  projectSiblings: BreadcrumbSibling[];
+  taskSiblings: BreadcrumbSibling[];
+  phaseSiblings: BreadcrumbSibling[];
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -66,7 +72,17 @@ function PriorityBadge({ priority }: { priority: string }) {
   );
 }
 
-export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
+export function PhaseDetail({
+  phase,
+  tickets,
+  projectId,
+  taskId,
+  projectName,
+  taskTitle,
+  projectSiblings,
+  taskSiblings,
+  phaseSiblings,
+}: Props) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -148,9 +164,29 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
           href={`/projects/${projectId}/tasks/${taskId}`}
           label="Back to task"
         />
-        <h1 className="flex-1 truncate text-base font-semibold tracking-tight text-zinc-100">
-          {phase.title}
-        </h1>
+        <Breadcrumb
+          segments={[
+            { label: "Ouverture", href: "/" },
+            {
+              label: projectName,
+              href: `/projects/${projectId}`,
+              siblings: projectSiblings,
+              currentId: projectId,
+            },
+            {
+              label: taskTitle,
+              href: `/projects/${projectId}/tasks/${taskId}`,
+              siblings: taskSiblings,
+              currentId: taskId,
+            },
+            {
+              label: phase.title,
+              href: null,
+              siblings: phaseSiblings,
+              currentId: phase.id,
+            },
+          ]}
+        />
         <PriorityBadge priority={phase.priority} />
         <span className="text-xs text-zinc-400">{phase.estimateHours}</span>
         <StatusBadge status={phase.status} />

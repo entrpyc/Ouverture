@@ -3,19 +3,29 @@
 import { useState } from "react";
 import type { Project } from "@/lib/types";
 import { ProjectModal } from "./project-modal";
+import { Breadcrumb, type BreadcrumbSibling } from "@/components/breadcrumb";
 
 type Props = {
   project: Project;
+  allProjects: BreadcrumbSibling[];
 };
 
-export function ProjectHeader({ project }: Props) {
+export function ProjectHeader({ project, allProjects }: Props) {
   const [editOpen, setEditOpen] = useState(false);
 
   return (
     <div className="flex flex-1 items-center justify-between gap-4">
-      <h1 className="truncate text-base font-semibold tracking-tight text-zinc-100">
-        {project.name}
-      </h1>
+      <Breadcrumb
+        segments={[
+          { label: "Ouverture", href: "/" },
+          {
+            label: project.name,
+            href: null,
+            siblings: allProjects,
+            currentId: project.id,
+          },
+        ]}
+      />
       <button
         type="button"
         onClick={() => setEditOpen(true)}

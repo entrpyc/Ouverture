@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getProject } from "@/app/actions/projects";
+import { getAllProjects } from "@/app/actions/breadcrumbs";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ToolingSection } from "@/components/projects/tooling-section";
 import { TaskList } from "@/components/tasks/task-list";
@@ -14,19 +15,27 @@ export default async function ProjectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const result = await getProject(id);
+  const [result, allProjectsResult] = await Promise.all([
+    getProject(id),
+    getAllProjects(),
+  ]);
   if (result.error || !result.data) {
     redirect("/");
   }
 
   const project = result.data;
+  const allProjects = (allProjectsResult.data ?? []).map((p) => ({
+    id: p.id,
+    title: p.title,
+    href: `/projects/${p.id}`,
+  }));
 
   return (
     <main className="flex min-h-screen flex-col">
       <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-4 px-6">
           <BackLink href="/" label="Back to projects" />
-          <ProjectHeader project={project} />
+          <ProjectHeader project={project} allProjects={allProjects} />
           <div className="ml-auto">
             <BurgerMenu />
           </div>

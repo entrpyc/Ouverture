@@ -1,6 +1,8 @@
 import { getProjects } from "@/app/actions/projects";
 import { ProjectsList } from "@/components/projects/projects-list";
 import { BurgerMenu } from "@/components/burger-menu";
+import { Breadcrumb } from "@/components/breadcrumb";
+import { BackLink } from "@/components/back-link";
 
 export default async function Home() {
   const result = await getProjects();
@@ -9,10 +11,9 @@ export default async function Home() {
   return (
     <main className="flex min-h-screen flex-col">
       <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
-        <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center justify-between px-6">
-          <span className="text-base font-semibold tracking-tight text-zinc-100">
-            Ouverture
-          </span>
+        <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-4 px-6">
+          <BackLink label="Back" disabled />
+          <Breadcrumb segments={[{ label: "Ouverture", href: "/" }]} />
           <BurgerMenu />
         </div>
       </header>

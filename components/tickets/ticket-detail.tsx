@@ -9,12 +9,20 @@ import { DeleteTicketDialog } from "./delete-ticket-dialog";
 import { TicketToolingEditor } from "./ticket-tooling-editor";
 import { BurgerMenu } from "@/components/burger-menu";
 import { BackLink } from "@/components/back-link";
+import { Breadcrumb, type BreadcrumbSibling } from "@/components/breadcrumb";
 
 type Props = {
   ticket: Ticket & { tooling: TicketTooling[] };
   projectId: string;
   taskId: string;
   phaseId: string;
+  projectName: string;
+  taskTitle: string;
+  phaseTitle: string;
+  projectSiblings: BreadcrumbSibling[];
+  taskSiblings: BreadcrumbSibling[];
+  phaseSiblings: BreadcrumbSibling[];
+  ticketSiblings: BreadcrumbSibling[];
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -91,7 +99,19 @@ function CopyBlock({ text }: { text: string }) {
   );
 }
 
-export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
+export function TicketDetail({
+  ticket,
+  projectId,
+  taskId,
+  phaseId,
+  projectName,
+  taskTitle,
+  phaseTitle,
+  projectSiblings,
+  taskSiblings,
+  phaseSiblings,
+  ticketSiblings,
+}: Props) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -132,9 +152,35 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
           href={`/projects/${projectId}/tasks/${taskId}/phases/${phaseId}`}
           label="Back to phase"
         />
-        <h1 className="flex-1 truncate text-base font-semibold tracking-tight text-zinc-100">
-          {ticket.title}
-        </h1>
+        <Breadcrumb
+          segments={[
+            { label: "Ouverture", href: "/" },
+            {
+              label: projectName,
+              href: `/projects/${projectId}`,
+              siblings: projectSiblings,
+              currentId: projectId,
+            },
+            {
+              label: taskTitle,
+              href: `/projects/${projectId}/tasks/${taskId}`,
+              siblings: taskSiblings,
+              currentId: taskId,
+            },
+            {
+              label: phaseTitle,
+              href: `/projects/${projectId}/tasks/${taskId}/phases/${phaseId}`,
+              siblings: phaseSiblings,
+              currentId: phaseId,
+            },
+            {
+              label: ticket.title,
+              href: null,
+              siblings: ticketSiblings,
+              currentId: ticket.id,
+            },
+          ]}
+        />
         <StatusBadge status={ticket.status} />
         <div ref={menuRef} className="relative">
           <button

@@ -370,7 +370,7 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
               >
                 {isGenerating ? (
                   <>
-                    Generating tickets <ThinkingEmoji intervalMs={2000} />
+                    Generating tickets <ThinkingEmoji />
                   </>
                 ) : (
                   "Generate tickets"

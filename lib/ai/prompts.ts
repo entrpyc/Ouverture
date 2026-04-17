@@ -9,7 +9,7 @@ export const REQUIREMENTS_ANALYST: AIMessage = {
 export const FINALIZE_INSTRUCTION: AIMessage = {
   role: "user",
   content:
-    'Based on our conversation, generate structured task requirements as a JSON object with these exact fields: { "title": string, "requirements": string }. The "requirements" field should be a comprehensive prose description of everything discussed — goals, constraints, out of scope items, and success criteria — written as a single coherent text. Output only valid JSON — no markdown, no code fences, no preamble.',
+    'Based on our conversation, generate structured task requirements as a JSON object with these exact fields: { "title": string, "requirements": string, "assumptions": string }. The "requirements" field should be a comprehensive prose description of everything discussed — goals, constraints, out of scope items, and success criteria — written as a single coherent text. The "assumptions" field must be a bullet list (each line prefixed with "- ") capturing every assumption you made while writing the requirements: defaults you picked when the developer did not specify, technical choices you inferred from context, expected environment or library versions, user behaviour you took for granted, and anything else that would invalidate the spec if wrong. Do not restate facts the developer explicitly confirmed. If there are no assumptions, output an empty string. Output only valid JSON — no markdown, no code fences, no preamble.',
 };
 
 export const IMPLEMENTATION_ARCHITECT: AIMessage = {

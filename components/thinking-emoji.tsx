@@ -20,21 +20,30 @@ const THINKING_EMOJI_POOL = [
   "🐌",
 ];
 
+function pickEmoji(exclude: string[] = []) {
+  const pool = THINKING_EMOJI_POOL.filter((e) => !exclude.includes(e));
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function pickThreeEmojis() {
-  const pool = [...THINKING_EMOJI_POOL];
   const picked: string[] = [];
   for (let i = 0; i < 3; i++) {
-    const idx = Math.floor(Math.random() * pool.length);
-    picked.push(pool.splice(idx, 1)[0]);
+    picked.push(pickEmoji(picked));
   }
   return picked;
 }
 
-export function ThinkingEmoji({ intervalMs = 3000 }: { intervalMs?: number }) {
+export function ThinkingEmoji({ intervalMs = 500 }: { intervalMs?: number }) {
   const [emojis, setEmojis] = useState(pickThreeEmojis);
   useEffect(() => {
+    let position = 2;
     const id = setInterval(() => {
-      setEmojis(pickThreeEmojis());
+      setEmojis((prev) => {
+        const next = [...prev];
+        next[position] = pickEmoji(next);
+        position = (position + 2) % 3;
+        return next;
+      });
     }, intervalMs);
     return () => clearInterval(id);
   }, [intervalMs]);

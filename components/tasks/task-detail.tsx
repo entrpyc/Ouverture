@@ -11,6 +11,7 @@ import { ConfirmedPhaseRow } from "@/components/phases/confirmed-phase-row";
 import { ThinkingEmoji } from "@/components/thinking-emoji";
 import { BurgerMenu } from "@/components/burger-menu";
 import { BackLink } from "@/components/back-link";
+import { AssumptionsCard } from "@/components/assumptions-card";
 
 export type ProposedPhase = {
   title: string;
@@ -223,6 +224,8 @@ export function TaskDetail({ task, projectId }: Props) {
           </div>
         </section>
 
+        {task.assumptions && <AssumptionsCard assumptions={task.assumptions} />}
+
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
             Phases
@@ -307,7 +310,7 @@ export function TaskDetail({ task, projectId }: Props) {
                 >
                   {isGenerating ? (
                     <>
-                      Generating phases <ThinkingEmoji intervalMs={2000} />
+                      Generating phases <ThinkingEmoji />
                     </>
                   ) : (
                     "Generate phases"

@@ -52,13 +52,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await adapter.complete<{ title: string; requirements: string }>([
-      ...messages,
-      FINALIZE_INSTRUCTION,
-    ]);
+    const result = await adapter.complete<{
+      title: string;
+      requirements: string;
+      assumptions?: string;
+    }>([...messages, FINALIZE_INSTRUCTION]);
     return NextResponse.json({
       title: result.title,
       requirements: result.requirements,
+      assumptions: typeof result.assumptions === "string" ? result.assumptions : "",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Finalize request failed";

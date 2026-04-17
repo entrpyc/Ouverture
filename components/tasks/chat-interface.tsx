@@ -298,14 +298,16 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
         throw new Error(detail);
       }
 
-      const { title, requirements } = (await response.json()) as {
+      const { title, requirements, assumptions } = (await response.json()) as {
         title: string;
         requirements: string;
+        assumptions?: string;
       };
 
       const result = await finalizeTask(task.id, {
         title,
         requirements,
+        assumptions: assumptions ?? "",
         conversationHistory: messages,
       });
       if (result.error) throw new Error(result.error);
@@ -381,7 +383,7 @@ export function ChatInterface({ task, projectId, projectTools }: Props) {
         >
           {isFinalizing ? (
             <>
-              Finalizing <ThinkingEmoji intervalMs={2000} />
+              Finalizing <ThinkingEmoji />
             </>
           ) : (
             "Finalize"

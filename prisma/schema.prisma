@@ -50,6 +50,7 @@ model Task {
   userId              String
   title               String
   requirements        String?
+  assumptions         String?
   conversationHistory Json?
   proposedPhases      Json?
   status              String   @default("active") // active | done

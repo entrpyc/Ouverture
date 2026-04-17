@@ -88,7 +88,12 @@ export async function createTask(
 
 export async function finalizeTask(
   taskId: string,
-  data: { title: string; requirements: string; conversationHistory: object[] }
+  data: {
+    title: string;
+    requirements: string;
+    assumptions?: string;
+    conversationHistory: object[];
+  }
 ): Promise<ActionResponse<Task>> {
   try {
     const userId = await getAuthenticatedUserId();
@@ -102,12 +107,14 @@ export async function finalizeTask(
     if (!title) return failure("Title is required");
     const requirements = data.requirements.trim();
     if (!requirements) return failure("Requirements are required");
+    const assumptions = data.assumptions?.trim() ?? "";
 
     const task = await prisma.task.update({
       where: { id: taskId },
       data: {
         title,
         requirements,
+        assumptions,
         conversationHistory: data.conversationHistory,
       },
     });

@@ -23,6 +23,7 @@ export type EditableTicket = {
 type Props = {
   ticket: EditableTicket;
   index: number;
+  titleInvalid?: boolean;
   onChange: (next: EditableTicket) => void;
   onRemove: () => void;
 };
@@ -33,7 +34,13 @@ const TEXTAREA_CLASS = `${TEXT_INPUT_CLASS} resize-y`;
 const LABEL_CLASS =
   "text-[10px] font-semibold uppercase tracking-wide text-zinc-500";
 
-export function ProposedTicketCard({ ticket, index, onChange, onRemove }: Props) {
+export function ProposedTicketCard({
+  ticket,
+  index,
+  titleInvalid,
+  onChange,
+  onRemove,
+}: Props) {
   function updateField<K extends keyof EditableTicket>(
     key: K,
     value: EditableTicket[K]
@@ -92,7 +99,11 @@ export function ProposedTicketCard({ ticket, index, onChange, onRemove }: Props)
           type="text"
           value={ticket.title}
           onChange={(e) => updateField("title", e.target.value)}
-          className={TEXT_INPUT_CLASS}
+          className={
+            titleInvalid
+              ? `${TEXT_INPUT_CLASS} border-red-700 focus:border-red-600`
+              : TEXT_INPUT_CLASS
+          }
         />
       </div>
 

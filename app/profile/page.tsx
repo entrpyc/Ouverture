@@ -1,9 +1,59 @@
-export default function ProfilePage() {
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { BurgerMenu } from "@/components/burger-menu";
+import { ProfileForm } from "@/components/profile/profile-form";
+
+export default async function ProfilePage() {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    redirect("/login");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, minimaxApiKey: true },
+  });
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
     <main className="flex min-h-screen flex-col">
-      <section className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col px-6 py-6 pt-[calc(5rem+1.5rem)]">
-        <h1 className="text-lg font-semibold text-zinc-100">Profile</h1>
-        <p className="mt-2 text-sm text-zinc-400">Coming soon.</p>
+      <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
+        <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-4 px-6">
+          <Link
+            href="/"
+            aria-label="Back to projects"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M10 3L5 8l5 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+          <h1 className="text-base font-semibold tracking-tight text-zinc-100">
+            Profile
+          </h1>
+          <div className="ml-auto">
+            <BurgerMenu />
+          </div>
+        </div>
+      </header>
+
+      <section className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-6 pt-[calc(5rem+1.5rem)]">
+        <ProfileForm
+          initialName={user.name ?? ""}
+          initialEmail={user.email}
+          hasApiKey={Boolean(user.minimaxApiKey)}
+        />
       </section>
     </main>
   );

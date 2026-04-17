@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUserId } from "@/lib/auth-helpers";
+import { decrypt } from "@/lib/encryption";
 import { MiniMaxAdapter } from "./minimax-adapter";
 import type { AIAdapter } from "./adapter";
 
@@ -16,5 +17,5 @@ export async function getAdapterForUser(): Promise<AIAdapter> {
     );
   }
 
-  return new MiniMaxAdapter(user.minimaxApiKey);
+  return new MiniMaxAdapter(decrypt(user.minimaxApiKey));
 }

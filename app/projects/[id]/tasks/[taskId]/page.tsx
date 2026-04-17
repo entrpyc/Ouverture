@@ -29,6 +29,14 @@ export default async function TaskPage({
   const hasRequirements =
     typeof task.requirements === "string" && task.requirements.length > 0;
 
+  if (hasRequirements) {
+    return (
+      <main className="flex min-h-screen flex-col">
+        <TaskDetail task={task} projectId={id} />
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen flex-col">
       <header className="flex items-center gap-4 border-b border-zinc-800 px-6 py-4">
@@ -53,11 +61,7 @@ export default async function TaskPage({
       </header>
 
       <section className="flex flex-1 flex-col px-6 py-6">
-        {hasRequirements ? (
-          <TaskDetail task={task} projectId={id} />
-        ) : (
-          <ChatInterface task={task} projectId={id} projectTools={project.tools} />
-        )}
+        <ChatInterface task={task} projectId={id} projectTools={project.tools} />
       </section>
     </main>
   );

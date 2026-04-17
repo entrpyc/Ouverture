@@ -7,6 +7,7 @@ import { EditPhaseModal } from "./edit-phase-modal";
 import { DeletePhaseDialog } from "./delete-phase-dialog";
 import { PhaseToolingEditor } from "./phase-tooling-editor";
 import { ProposedTicketsReview } from "@/components/tickets/proposed-tickets-review";
+import { ConfirmedTicketRow } from "@/components/tickets/confirmed-ticket-row";
 
 export type ProposedTicket = {
   title: string;
@@ -262,14 +263,13 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
           {hasConfirmedTickets ? (
             <ul className="flex flex-col gap-2">
               {tickets.map((ticket: Ticket) => (
-                <li
-                  key={ticket.id}
-                  className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3"
-                >
-                  <span className="flex-1 truncate text-sm text-zinc-100">
-                    {ticket.title}
-                  </span>
-                  <StatusBadge status={ticket.status} />
+                <li key={ticket.id}>
+                  <ConfirmedTicketRow
+                    ticket={ticket}
+                    projectId={projectId}
+                    taskId={taskId}
+                    phaseId={phase.id}
+                  />
                 </li>
               ))}
             </ul>

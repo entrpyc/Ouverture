@@ -6,6 +6,7 @@ import type { Phase, Priority, Task, ToolType } from "@/lib/types";
 import { EditTaskModal } from "./edit-task-modal";
 import { DeleteTaskDialog } from "./delete-task-dialog";
 import { ProposedPhasesReview } from "@/components/phases/proposed-phases-review";
+import { ConfirmedPhaseRow } from "@/components/phases/confirmed-phase-row";
 
 export type ProposedPhase = {
   title: string;
@@ -36,22 +37,6 @@ function StatusBadge({ status }: { status: string }) {
       }
     >
       {status}
-    </span>
-  );
-}
-
-function PriorityBadge({ priority }: { priority: string }) {
-  const styles =
-    priority === "high"
-      ? "border-red-800 bg-red-950/60 text-red-300"
-      : priority === "medium"
-        ? "border-amber-800 bg-amber-950/60 text-amber-300"
-        : "border-emerald-800 bg-emerald-950/60 text-emerald-300";
-  return (
-    <span
-      className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${styles}`}
-    >
-      {priority}
     </span>
   );
 }
@@ -211,18 +196,12 @@ export function TaskDetail({ task, projectId }: Props) {
           {hasConfirmedPhases ? (
             <ul className="flex flex-col gap-2">
               {task.phases.map((phase: Phase) => (
-                <li
-                  key={phase.id}
-                  className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3"
-                >
-                  <span className="flex-1 truncate text-sm text-zinc-100">
-                    {phase.title}
-                  </span>
-                  <PriorityBadge priority={phase.priority} />
-                  <span className="text-xs text-zinc-400">
-                    {phase.estimateHours}
-                  </span>
-                  <StatusBadge status={phase.status} />
+                <li key={phase.id}>
+                  <ConfirmedPhaseRow
+                    phase={phase}
+                    projectId={projectId}
+                    taskId={task.id}
+                  />
                 </li>
               ))}
             </ul>

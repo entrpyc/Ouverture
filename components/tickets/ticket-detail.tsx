@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Ticket, TicketTooling } from "@/lib/types";
@@ -9,6 +8,7 @@ import { EditTicketModal } from "./edit-ticket-modal";
 import { DeleteTicketDialog } from "./delete-ticket-dialog";
 import { TicketToolingEditor } from "./ticket-tooling-editor";
 import { BurgerMenu } from "@/components/burger-menu";
+import { BackLink } from "@/components/back-link";
 
 type Props = {
   ticket: Ticket & { tooling: TicketTooling[] };
@@ -128,21 +128,10 @@ export function TicketDetail({ ticket, projectId, taskId, phaseId }: Props) {
     <div className="flex flex-1 flex-col">
       <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-3 px-6">
-        <Link
+        <BackLink
           href={`/projects/${projectId}/tasks/${taskId}/phases/${phaseId}`}
-          aria-label="Back to phase"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path
-              d="M10 3L5 8l5 5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
+          label="Back to phase"
+        />
         <h1 className="flex-1 truncate text-base font-semibold tracking-tight text-zinc-100">
           {ticket.title}
         </h1>

@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTask } from "@/app/actions/tasks";
 import { getProject } from "@/app/actions/projects";
 import { ChatInterface } from "@/components/tasks/chat-interface";
 import { TaskDetail } from "@/components/tasks/task-detail";
 import { BurgerMenu } from "@/components/burger-menu";
+import { BackLink } from "@/components/back-link";
 
 export default async function TaskPage({
   params,
@@ -42,21 +42,7 @@ export default async function TaskPage({
     <main className="flex min-h-screen flex-col">
       <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-4 px-6">
-          <Link
-            href={`/projects/${id}`}
-            aria-label="Back to project"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path
-                d="M10 3L5 8l5 5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
+          <BackLink href={`/projects/${id}`} label="Back to project" />
           <h1 className="truncate text-base font-semibold tracking-tight text-zinc-100">
             {task.title}
           </h1>

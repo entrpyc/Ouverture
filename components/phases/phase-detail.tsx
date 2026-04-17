@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { Phase, PhaseTooling, Ticket, ToolType } from "@/lib/types";
+import { updatePhaseStatus } from "@/app/actions/phases";
 import { EditPhaseModal } from "./edit-phase-modal";
 import { DeletePhaseDialog } from "./delete-phase-dialog";
 import { PhaseToolingEditor } from "./phase-tooling-editor";
@@ -63,6 +65,7 @@ function PriorityBadge({ priority }: { priority: string }) {
 }
 
 export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -72,9 +75,22 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
     ProposedTicket[] | null
   >(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [statusPending, startStatusTransition] = useTransition();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const hasConfirmedTickets = tickets.length > 0;
+  const isDone = phase.status === "done";
+
+  function handleToggleStatus() {
+    if (statusPending) return;
+    const next = isDone ? "active" : "done";
+    setMenuOpen(false);
+    startStatusTransition(async () => {
+      const result = await updatePhaseStatus(phase.id, next);
+      if (result.error) return;
+      router.refresh();
+    });
+  }
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -160,7 +176,7 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
           {menuOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-9 z-10 w-32 overflow-hidden rounded-md border border-zinc-800 bg-zinc-900 shadow-lg"
+              className="absolute right-0 top-9 z-10 w-40 overflow-hidden rounded-md border border-zinc-800 bg-zinc-900 shadow-lg"
             >
               <button
                 type="button"
@@ -172,6 +188,21 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
                 className="block w-full px-3 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800"
               >
                 Edit
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleToggleStatus}
+                disabled={statusPending}
+                className="block w-full px-3 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {statusPending
+                  ? isDone
+                    ? "Reopening…"
+                    : "Marking…"
+                  : isDone
+                    ? "Reopen"
+                    : "Mark as done"}
               </button>
               <button
                 type="button"

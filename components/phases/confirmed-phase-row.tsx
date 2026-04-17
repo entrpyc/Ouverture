@@ -51,11 +51,12 @@ export function ConfirmedPhaseRow({ phase, projectId, taskId }: Props) {
   const isDone = phase.status === "done";
   const href = `/projects/${projectId}/tasks/${taskId}/phases/${phase.id}`;
 
-  function handleMarkDone() {
-    if (pending || isDone) return;
+  function handleToggleStatus() {
+    if (pending) return;
+    const next = isDone ? "active" : "done";
     setError(null);
     startTransition(async () => {
-      const result = await updatePhaseStatus(phase.id, "done");
+      const result = await updatePhaseStatus(phase.id, next);
       if (result.error) {
         setError(result.error);
         return;
@@ -88,16 +89,20 @@ export function ConfirmedPhaseRow({ phase, projectId, taskId }: Props) {
           <span className="text-xs text-zinc-400">{phase.estimateHours}</span>
           <StatusBadge status={phase.status} />
         </Link>
-        {!isDone && (
-          <button
-            type="button"
-            onClick={handleMarkDone}
-            disabled={pending}
-            className="mr-3 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-          >
-            {pending ? "Marking…" : "Mark done"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleToggleStatus}
+          disabled={pending}
+          className="mr-3 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+        >
+          {pending
+            ? isDone
+              ? "Reopening…"
+              : "Marking…"
+            : isDone
+              ? "Reopen"
+              : "Mark as done"}
+        </button>
       </div>
       {error && (
         <p className="px-4 text-xs text-red-400" role="alert">

@@ -40,6 +40,18 @@ export function ProjectsList({ projects }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!selectMode || bulkDeleteOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        exitSelectMode();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectMode, bulkDeleteOpen]);
+
   const visibleIds = useMemo(() => projects.map((p) => p.id), [projects]);
   const selectedCount = selectedIds.size;
   const allSelected =

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Phase, Priority, Task, ToolType } from "@/lib/types";
 import { EditTaskModal } from "./edit-task-modal";
 import { DeleteTaskDialog } from "./delete-task-dialog";
+import { ProposedPhasesReview } from "@/components/phases/proposed-phases-review";
 
 export type ProposedPhase = {
   title: string;
@@ -226,22 +227,10 @@ export function TaskDetail({ task, projectId }: Props) {
               ))}
             </ul>
           ) : proposedPhases ? (
-            <ul className="flex flex-col gap-2">
-              {proposedPhases.map((phase, i) => (
-                <li
-                  key={i}
-                  className="flex items-center gap-3 rounded-lg border border-dashed border-zinc-700 bg-zinc-900/60 px-4 py-3"
-                >
-                  <span className="flex-1 truncate text-sm text-zinc-100">
-                    {phase.title}
-                  </span>
-                  <PriorityBadge priority={phase.priority} />
-                  <span className="text-xs text-zinc-400">
-                    {phase.estimateHours}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <ProposedPhasesReview
+              proposedPhases={proposedPhases}
+              onCancel={() => setProposedPhases(null)}
+            />
           ) : (
             <div className="flex flex-col items-start gap-2">
               <button

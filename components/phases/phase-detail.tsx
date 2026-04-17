@@ -76,10 +76,13 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
   >(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [statusPending, startStatusTransition] = useTransition();
+  const [doneTicketsOpen, setDoneTicketsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const hasConfirmedTickets = tickets.length > 0;
   const isDone = phase.status === "done";
+  const activeTickets = tickets.filter((t: Ticket) => t.status !== "done");
+  const doneTickets = tickets.filter((t: Ticket) => t.status === "done");
 
   function handleToggleStatus() {
     if (statusPending) return;
@@ -292,18 +295,67 @@ export function PhaseDetail({ phase, tickets, projectId, taskId }: Props) {
             Tickets
           </h2>
           {hasConfirmedTickets ? (
-            <ul className="flex flex-col gap-2">
-              {tickets.map((ticket: Ticket) => (
-                <li key={ticket.id}>
-                  <ConfirmedTicketRow
-                    ticket={ticket}
-                    projectId={projectId}
-                    taskId={taskId}
-                    phaseId={phase.id}
-                  />
-                </li>
-              ))}
-            </ul>
+            <div className="flex flex-col gap-3">
+              {activeTickets.length > 0 && (
+                <ul className="flex flex-col gap-2">
+                  {activeTickets.map((ticket: Ticket) => (
+                    <li key={ticket.id}>
+                      <ConfirmedTicketRow
+                        ticket={ticket}
+                        projectId={projectId}
+                        taskId={taskId}
+                        phaseId={phase.id}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {doneTickets.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    aria-expanded={doneTicketsOpen}
+                    onClick={() => setDoneTicketsOpen((v) => !v)}
+                    className="flex items-center gap-2 self-start rounded-md px-1 py-1 text-xs font-medium uppercase tracking-wide text-zinc-500 hover:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-600"
+                  >
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 10 10"
+                      fill="none"
+                      aria-hidden="true"
+                      className={
+                        "transition-transform " +
+                        (doneTicketsOpen ? "rotate-90" : "")
+                      }
+                    >
+                      <path
+                        d="M3 2l4 3-4 3"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span>Done ({doneTickets.length})</span>
+                  </button>
+                  {doneTicketsOpen && (
+                    <ul className="flex flex-col gap-2">
+                      {doneTickets.map((ticket: Ticket) => (
+                        <li key={ticket.id}>
+                          <ConfirmedTicketRow
+                            ticket={ticket}
+                            projectId={projectId}
+                            taskId={taskId}
+                            phaseId={phase.id}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
           ) : proposedTickets ? (
             <ProposedTicketsReview
               phaseId={phase.id}

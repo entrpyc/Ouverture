@@ -60,7 +60,7 @@ export function ConfirmedTicketRow({
       <div
         className={
           "flex items-center gap-3 rounded-lg border border-zinc-800 " +
-          (isDone ? "bg-zinc-900/50 opacity-70" : "bg-zinc-900")
+          (isDone ? "bg-zinc-900/50 opacity-60" : "bg-zinc-900")
         }
       >
         <Link

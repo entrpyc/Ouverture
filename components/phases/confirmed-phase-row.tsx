@@ -27,9 +27,16 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function PriorityBadge({ priority }: { priority: string }) {
-  const styles =
-    priority === "high"
+function PriorityBadge({
+  priority,
+  muted = false,
+}: {
+  priority: string;
+  muted?: boolean;
+}) {
+  const styles = muted
+    ? "border-zinc-800 bg-zinc-900 text-zinc-500"
+    : priority === "high"
       ? "border-red-800 bg-red-950/60 text-red-300"
       : priority === "medium"
         ? "border-amber-800 bg-amber-950/60 text-amber-300"
@@ -70,7 +77,7 @@ export function ConfirmedPhaseRow({ phase, projectId, taskId }: Props) {
       <div
         className={
           "flex items-center gap-3 rounded-lg border border-zinc-800 " +
-          (isDone ? "bg-zinc-900/50 opacity-70" : "bg-zinc-900")
+          (isDone ? "bg-zinc-900/50 opacity-60" : "bg-zinc-900")
         }
       >
         <Link
@@ -85,8 +92,14 @@ export function ConfirmedPhaseRow({ phase, projectId, taskId }: Props) {
           >
             {phase.title}
           </span>
-          <PriorityBadge priority={phase.priority} />
-          <span className="text-xs text-zinc-400">{phase.estimateHours}</span>
+          <PriorityBadge priority={phase.priority} muted={isDone} />
+          <span
+            className={
+              "text-xs " + (isDone ? "text-zinc-500" : "text-zinc-400")
+            }
+          >
+            {phase.estimateHours}
+          </span>
           <StatusBadge status={phase.status} />
         </Link>
         <button
